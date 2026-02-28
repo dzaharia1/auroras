@@ -1,0 +1,9 @@
+{
+  "short_name": "auroras",
+  "name": "auroras",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
+
