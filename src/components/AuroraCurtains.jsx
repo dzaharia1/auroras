@@ -141,7 +141,11 @@ export default function AuroraCurtains({
       varying vec3 vColor;
       void main() {
         vUv = uv;
-        vColor = instanceColor;
+        #ifdef USE_INSTANCING_COLOR
+          vColor = instanceColor;
+        #else
+          vColor = vec3(0.0, 0.8, 0.4); // fallback green until buffer is ready
+        #endif
         vec3 pos = position;
         vec4 worldPos = instanceMatrix * vec4(pos, 1.0);
         float wave = snoise(vec2(worldPos.x * 0.08 + time * 0.15, worldPos.z * 0.08));
