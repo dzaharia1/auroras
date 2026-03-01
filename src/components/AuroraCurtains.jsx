@@ -58,6 +58,13 @@ function populateMesh(mesh, coords, earthRadius) {
   const color = new THREE.Color();
   const up = new THREE.Vector3(0, 1, 0);
 
+  // Per-instance color is stored as a plain geometry attribute (InstancedBufferAttribute).
+  // This bypasses THREE.js's USE_INSTANCING_COLOR shader define entirely, which was
+  // unreliable in production because the define is only injected at shader compile time
+  // when mesh.instanceColor is already non-null — a race that fails when textures are
+  // served from Cloudflare's cache and the mesh mounts before API data arrives.
+  const colorAttr = mesh.geometry.getAttribute('auroraColor');
+
   for (let i = 0; i < count; i++) {
     const [lon, lat, val] = filtered[i];
 
@@ -85,16 +92,13 @@ function populateMesh(mesh, coords, earthRadius) {
 
     // Green (low) → purple (high)
     color.setHSL(0.33 + intensity * 0.42, 1.0, 0.4 + intensity * 0.3);
-    mesh.setColorAt(i, color);
+    color.toArray(colorAttr.array, i * 3);
   }
 
   mesh.count = count;
   mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   mesh.instanceMatrix.needsUpdate = true;
-  if (mesh.instanceColor) {
-    mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
-    mesh.instanceColor.needsUpdate = true;
-  }
+  colorAttr.needsUpdate = true;
 
   console.log('[Aurora] rendered', count, 'curtains');
 }
@@ -109,22 +113,11 @@ export default function AuroraCurtains({
 
   const meshRef = useRef(null);
 
-  // Callback ref: fires when the mesh mounts AND whenever it changes.
-  // This guarantees populateMesh is called as soon as the DOM node exists.
+  // Callback ref: fires when the mesh mounts. Runs populateMesh immediately so
+  // auroras appear right away if data is already available (e.g. from a cached response).
   const setMeshRef = useCallback((node) => {
     meshRef.current = node;
     if (node) {
-      // Pre-allocate instanceColor so Three.js compiles the shader with
-      // USE_INSTANCING_COLOR on frame 0. When textures are cached the mesh
-      // mounts before API data arrives, so setColorAt hasn't been called yet
-      // and the shader would compile without the define. material.needsUpdate
-      // alone is not reliable for adding a new attribute retroactively.
-      if (!node.instanceColor) {
-        node.instanceColor = new THREE.InstancedBufferAttribute(
-          new Float32Array(MAX_INSTANCES * 3),
-          3,
-        ).setUsage(THREE.DynamicDrawUsage);
-      }
       const { spaceWeather: sw, earthRadius: er } = propsRef.current;
       populateMesh(node, sw?.ovation?.coordinates, er);
     }
@@ -139,10 +132,18 @@ export default function AuroraCurtains({
     );
   }, [spaceWeather, earthRadius]);
 
-  // Tall thin plane anchored at the bottom edge
+  // Tall thin plane anchored at the bottom edge.
+  // The 'auroraColor' InstancedBufferAttribute stores per-instance RGB color data.
+  // Using a named geometry attribute instead of InstancedMesh.instanceColor avoids
+  // THREE.js's USE_INSTANCING_COLOR define system, which requires the define to already
+  // be present at shader compile time — something we cannot guarantee in production.
   const geometry = useMemo(() => {
     const g = new THREE.PlaneGeometry(1, 1, 1, 8);
     g.translate(0, 0.5, 0);
+    g.setAttribute(
+      'auroraColor',
+      new THREE.InstancedBufferAttribute(new Float32Array(MAX_INSTANCES * 3), 3),
+    );
     return g;
   }, []);
 
@@ -152,23 +153,14 @@ export default function AuroraCurtains({
         uniforms: { time: { value: 0 } },
         vertexShader: `
       ${NOISE_GLSL}
-      #ifndef USE_INSTANCING
-        attribute mat4 instanceMatrix;
-      #endif
-      #ifndef USE_INSTANCING_COLOR
-        attribute vec3 instanceColor;
-      #endif
+      attribute vec3 auroraColor;
 
       uniform float time;
       varying vec2 vUv;
       varying vec3 vColor;
       void main() {
         vUv = uv;
-        #ifdef USE_INSTANCING_COLOR
-          vColor = instanceColor;
-        #else
-          vColor = vec3(0.0, 0.8, 0.4); // fallback green until buffer is ready
-        #endif
+        vColor = auroraColor;
         vec3 pos = position;
         vec4 worldPos = instanceMatrix * vec4(pos, 1.0);
         float wave = snoise(vec2(worldPos.x * 0.08 + time * 0.15, worldPos.z * 0.08));
