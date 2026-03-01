@@ -139,6 +139,8 @@ export default function AuroraCurtains({
       uniform float time;
       varying vec2 vUv;
       varying vec3 vColor;
+      // Explicitly declare — Three.js only auto-injects this for built-in materials
+      attribute vec3 instanceColor;
       void main() {
         vUv = uv;
         vColor = instanceColor;
