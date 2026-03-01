@@ -169,11 +169,7 @@ export default function Earth({ position, spaceWeather, autoRotate }) {
   });
 
   return (
-    <group
-      position={position}
-      ref={groupRef}
-      rotation={[0.6, 0, 0]} // Steeper tilt to emphasize north pole
-    >
+    <group position={position} ref={groupRef}>
       <mesh ref={earthRef} material={earthMaterial}>
         <sphereGeometry args={[18, 64, 64]} />
       </mesh>

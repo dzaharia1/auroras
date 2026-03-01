@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 
-const MAX_INSTANCES = 5000;
+const MAX_INSTANCES = 9000;
 const EARTH_RADIUS = 18;
 
 // Simplex noise GLSL
@@ -142,7 +142,10 @@ export default function AuroraCurtains({
     g.translate(0, 0.5, 0);
     g.setAttribute(
       'auroraColor',
-      new THREE.InstancedBufferAttribute(new Float32Array(MAX_INSTANCES * 3), 3),
+      new THREE.InstancedBufferAttribute(
+        new Float32Array(MAX_INSTANCES * 3),
+        3,
+      ),
     );
     return g;
   }, []);
