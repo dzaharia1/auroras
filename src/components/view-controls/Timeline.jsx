@@ -296,7 +296,7 @@ export default function Timeline({
       onDayChange(getDayOfYear(new Date()));
       setHistoricalData(null);
     }
-  }, [resetTrigger]);
+  }, [resetTrigger, onYearChange, onDayChange]);
 
   useEffect(() => {
     const fetchMajorEvents = async () => {

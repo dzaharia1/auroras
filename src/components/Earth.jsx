@@ -36,6 +36,21 @@ function getSubsolarVector(date) {
   return new THREE.Vector3(x, y, z).normalize();
 }
 
+const MONTHS = [
+  'january',
+  'february',
+  'march',
+  'april',
+  'may',
+  'june',
+  'july',
+  'august',
+  'september',
+  'october',
+  'november',
+  'december',
+];
+
 export default function Earth({
   position,
   spaceWeather,
@@ -49,10 +64,8 @@ export default function Earth({
   const auroraOffsetRef = useRef();
   const { gl } = useThree();
 
-  const [dayMap, nightMap] = useTexture([
-    '/textures/earth_day.jpg',
-    '/textures/earth_night.png',
-  ]);
+  const seasonalMaps = useTexture(MONTHS.map((m) => `/textures/day_${m}.jpg`));
+  const [nightMap] = useTexture(['/textures/earth_night.png']);
 
   // Use refs for drag state to avoid re-renders during mouse move
   const isDragging = useRef(false);
@@ -60,6 +73,9 @@ export default function Earth({
   const rotationVelocity = useRef(0);
 
   const earthMaterial = useMemo(() => {
+    const monthIndex = (currentDate || new Date()).getMonth();
+    const dayMap = seasonalMaps[monthIndex];
+
     return new THREE.ShaderMaterial({
       uniforms: {
         dayTexture: { value: dayMap },
@@ -102,7 +118,7 @@ export default function Earth({
             }
           `,
     });
-  }, [dayMap, nightMap]);
+  }, [currentDate, seasonalMaps, nightMap]);
 
   useEffect(() => {
     const el = gl.domElement;
