@@ -100,7 +100,7 @@ export default function Overlay({ spaceWeather }) {
         </TitleBox>
       </Header>
 
-      <StatsContainer>
+      {/* <StatsContainer>
         <StatGlass>
           <StatLabel>Solar Wind</StatLabel>
           <StatValue>
@@ -126,7 +126,7 @@ export default function Overlay({ spaceWeather }) {
           <StatLabel>Kp Index</StatLabel>
           <StatValue>{loading ? '--' : kp?.kp?.toFixed(1) || 'N/A'}</StatValue>
         </StatGlass>
-      </StatsContainer>
+      </StatsContainer> */}
     </Container>
   );
 }

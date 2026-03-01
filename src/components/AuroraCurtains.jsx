@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 
@@ -33,16 +33,100 @@ const NOISE_GLSL = `
   }
 `;
 
+function populateMesh(mesh, coords, earthRadius) {
+  if (!mesh || !coords || coords.length === 0) {
+    if (mesh) mesh.count = 0;
+    return;
+  }
+
+  // Filter: northern aurora oval zone, meaningful probability
+  const filtered = coords.filter(([, lat, val]) => lat >= 45 && val >= 5);
+  console.log(
+    '[Aurora] coords:',
+    coords.length,
+    '| north+filtered:',
+    filtered.length,
+  );
+
+  if (filtered.length === 0) {
+    mesh.count = 0;
+    return;
+  }
+
+  const count = Math.min(filtered.length, MAX_INSTANCES);
+  const dummy = new THREE.Object3D();
+  const color = new THREE.Color();
+  const up = new THREE.Vector3(0, 1, 0);
+
+  for (let i = 0; i < count; i++) {
+    const [lon, lat, val] = filtered[i];
+
+    // Spherical → Cartesian (Three.js Y-up)
+    const phi = (90 - lat) * (Math.PI / 180);
+    const theta = (lon + 180) * (Math.PI / 180);
+    const x = earthRadius * Math.sin(phi) * Math.sin(theta);
+    const y = earthRadius * Math.cos(phi);
+    const z = -earthRadius * Math.sin(phi) * Math.cos(theta);
+
+    // Orient plane so local Y points radially outward
+    const normal = new THREE.Vector3(x, y, z).normalize();
+    dummy.position.set(x, y, z);
+    dummy.quaternion.setFromUnitVectors(up, normal);
+    dummy.rotateOnWorldAxis(normal, Math.random() * Math.PI);
+
+    const intensity = Math.min(val / 100, 1.0);
+    const h = earthRadius * (0.06 + intensity * 0.19);
+    const w = 0.3 + Math.random() * 0.6;
+    dummy.scale.set(w, h, 1);
+
+    dummy.updateMatrix();
+    mesh.setMatrixAt(i, dummy.matrix);
+
+    // Green (low) → purple (high)
+    color.setHSL(0.33 + intensity * 0.42, 1.0, 0.4 + intensity * 0.3);
+    mesh.setColorAt(i, color);
+  }
+
+  mesh.count = count;
+  mesh.instanceMatrix.needsUpdate = true;
+  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+
+  console.log('[Aurora] rendered', count, 'curtains');
+}
+
 export default function AuroraCurtains({
   spaceWeather,
   earthRadius = EARTH_RADIUS,
 }) {
-  const meshRef = useRef();
+  // Use a ref to store latest props so the callback ref can access them
+  const propsRef = useRef({ spaceWeather, earthRadius });
+  propsRef.current = { spaceWeather, earthRadius };
 
-  // Tall thin plane, anchored at bottom
+  const meshRef = useRef(null);
+
+  // Callback ref: fires when the mesh mounts AND whenever it changes.
+  // This guarantees populateMesh is called as soon as the DOM node exists.
+  const setMeshRef = useCallback((node) => {
+    meshRef.current = node;
+    if (node) {
+      const { spaceWeather: sw, earthRadius: er } = propsRef.current;
+      populateMesh(node, sw?.ovation?.coordinates, er);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Re-populate when data changes (mesh already exists at this point)
+  useEffect(() => {
+    populateMesh(
+      meshRef.current,
+      spaceWeather?.ovation?.coordinates,
+      earthRadius,
+    );
+  }, [spaceWeather, earthRadius]);
+
+  // Tall thin plane anchored at the bottom edge
   const geometry = useMemo(() => {
     const g = new THREE.PlaneGeometry(1, 1, 1, 8);
-    g.translate(0, 0.5, 0); // pivot at bottom edge
+    g.translate(0, 0.5, 0);
     return g;
   }, []);
 
@@ -59,7 +143,6 @@ export default function AuroraCurtains({
         vUv = uv;
         vColor = instanceColor;
         vec3 pos = position;
-        // Wave the top of the curtain in world space
         vec4 worldPos = instanceMatrix * vec4(pos, 1.0);
         float wave = snoise(vec2(worldPos.x * 0.08 + time * 0.15, worldPos.z * 0.08));
         pos.x += wave * 1.5 * vUv.y;
@@ -70,7 +153,6 @@ export default function AuroraCurtains({
       varying vec2 vUv;
       varying vec3 vColor;
       void main() {
-        // Fade at sides and top, bright at base
         float edgeX = sin(vUv.x * 3.14159);
         float edgeY = 1.0 - smoothstep(0.3, 1.0, vUv.y);
         float alpha = edgeX * edgeY * 0.05;
@@ -89,75 +171,10 @@ export default function AuroraCurtains({
     if (material) material.uniforms.time.value = state.clock.elapsedTime;
   });
 
-  useEffect(() => {
-    const mesh = meshRef.current;
-    if (!mesh) return;
-
-    const coords = spaceWeather?.ovation?.coordinates;
-    if (!coords || coords.length === 0) {
-      mesh.count = 0;
-      return;
-    }
-
-    // Filter: northern hemisphere, value >= 5
-    const filtered = coords.filter(([, lat, val]) => lat >= 45 && val >= 5);
-    console.log(
-      '[Aurora] total coords:',
-      coords.length,
-      '| filtered (N, val>=5):',
-      filtered.length,
-    );
-
-    if (filtered.length === 0) {
-      mesh.count = 0;
-      return;
-    }
-
-    const count = Math.min(filtered.length, MAX_INSTANCES);
-    const dummy = new THREE.Object3D();
-    const color = new THREE.Color();
-    const up = new THREE.Vector3(0, 1, 0);
-
-    for (let i = 0; i < count; i++) {
-      const [lon, lat, val] = filtered[i];
-
-      // Spherical → Cartesian (Three.js Y-up convention)
-      const phi = (90 - lat) * (Math.PI / 180);
-      const theta = (lon + 180) * (Math.PI / 180);
-      const r = earthRadius;
-      const x = r * Math.sin(phi) * Math.sin(theta);
-      const y = r * Math.cos(phi);
-      const z = -r * Math.sin(phi) * Math.cos(theta);
-
-      // Orient plane: local Y points radially outward from surface
-      const normal = new THREE.Vector3(x, y, z).normalize();
-      dummy.position.set(x, y, z);
-      dummy.quaternion.setFromUnitVectors(up, normal);
-      // Random spin around the normal so curtains aren't all parallel
-      dummy.rotateOnWorldAxis(normal, Math.random() * Math.PI);
-
-      // Scale: height proportional to intensity, random width
-      const intensity = Math.min(val / 100, 1.0);
-      const h = earthRadius * (0.06 + intensity * 0.19); // ~6-25% of earth radius tall
-      const w = 0.3 + Math.random() * 0.6;
-      dummy.scale.set(w, h, 1);
-
-      dummy.updateMatrix();
-      mesh.setMatrixAt(i, dummy.matrix);
-
-      // Green (low) → purple (high): hue 0.33 → 0.75
-      color.setHSL(0.33 + intensity * 0.42, 1.0, 0.4 + intensity * 0.3);
-      mesh.setColorAt(i, color);
-    }
-
-    mesh.count = count;
-    mesh.instanceMatrix.needsUpdate = true;
-    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-
-    console.log('[Aurora] rendered', count, 'curtains');
-  }, [spaceWeather, earthRadius]);
-
   return (
-    <instancedMesh ref={meshRef} args={[geometry, material, MAX_INSTANCES]} />
+    <instancedMesh
+      ref={setMeshRef}
+      args={[geometry, material, MAX_INSTANCES]}
+    />
   );
 }
