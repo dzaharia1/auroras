@@ -9,12 +9,14 @@ import { useSpaceWeather } from './hooks/useSpaceWeather';
 import {
   generateStormOvation,
   generateSubstormOvation,
+  generateQuietOvation,
 } from './utils/stormData';
 import './index.css';
 
 // Pre-generate storm data once (expensive, ~10k points)
 const STORM_DATA = generateStormOvation();
 const SUBSTORM_DATA = generateSubstormOvation();
+const QUIET_DATA = generateQuietOvation();
 
 // Component to manage camera position for an oblique North Pole view
 function NorthPoleCamera({ zoomRadius = 25 }) {
@@ -74,7 +76,7 @@ function App() {
       !historicalSpaceWeather.error
     ) {
       const k = historicalSpaceWeather.maxKp || 0;
-      let demoCoords = [];
+      let demoCoords = QUIET_DATA; // Fallback to quiet glow
       if (k >= 8)
         demoCoords = STORM_DATA; // G4-G5
       else if (k >= 5) demoCoords = SUBSTORM_DATA; // G1-G3

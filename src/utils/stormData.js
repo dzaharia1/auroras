@@ -53,3 +53,20 @@ export function generateSubstormOvation() {
 
   return coords;
 }
+
+/** G0 Quiet aurora: polar oval, very low intensity (glow) */
+export function generateQuietOvation() {
+  const coords = [];
+
+  // Thin strip around 70-75 latitude
+  for (let lon = 0; lon < 360; lon += 5) { // Sparse
+    for (let lat = 70; lat <= 75; lat += 1) {
+      const latOffset = Math.abs(lat - 72.5);
+      const baseProbability = 20 - latOffset * 4; // Max 20 probability
+      const value = Math.round(baseProbability); 
+      if (value >= 5) coords.push([lon, lat, value]);
+    }
+  }
+
+  return coords;
+}

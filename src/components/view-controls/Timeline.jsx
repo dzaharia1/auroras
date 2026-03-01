@@ -65,10 +65,16 @@ const GValueDisplay = styled.div`
 const YearButtonsGroup = styled.div`
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   gap: 0.25rem;
   background: rgba(0, 0, 0, 0.2);
   padding: 0.25rem;
   border-radius: 10px;
+  justify-content: flex-end;
+
+  @media (max-width: 1280px) {
+    justify-content: flex-start;
+  }
 `;
 
 const YearButton = styled.button`
@@ -99,6 +105,79 @@ const LiveButton = styled(YearButton)`
   &:hover {
     background: rgba(100, 220, 180, 0.3);
     color: rgba(140, 255, 210, 1);
+  }
+`;
+
+const EventsGroup = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
+
+const EventButton = styled.button`
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+    transform: translateY(-1px);
+  }
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: ${(props) => {
+      if (props.$gValue >= 5) return '#ff4d4d';
+      if (props.$gValue >= 4) return '#ffb84d';
+      return '#8cdcd2';
+    }};
+  }
+`;
+
+const ScrubberRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const ChevronButton = styled.button`
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
   }
 `;
 
@@ -172,7 +251,9 @@ function formatDateForApi(date) {
   return date.toISOString().split('T')[0];
 }
 
-const AVAILABLE_YEARS = [2023, 2024, 2025, 2026];
+const AVAILABLE_YEARS = [
+  1989, 2003, 2005, 2015, 2017, 2022, 2023, 2024, 2025, 2026,
+];
 const API_BASE = import.meta.env.VITE_BACKEND_URL;
 
 export default function Timeline({
@@ -186,8 +267,17 @@ export default function Timeline({
   const [day, setDay] = useState(getDayOfYear(new Date()));
   const [loading, setLoading] = useState(false);
   const [historicalData, setHistoricalData] = useState(null);
+  const [majorEvents, setMajorEvents] = useState([]);
 
   const currentDate = getDateFromDayOfYear(year, day);
+
+  const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  let maxDays = isLeapYear ? 366 : 365;
+
+  const today = new Date();
+  if (year === today.getFullYear()) {
+    maxDays = Math.min(maxDays, getDayOfYear(today));
+  }
 
   // Auto-reset when 'live' mode triggers it
   useEffect(() => {
@@ -197,6 +287,20 @@ export default function Timeline({
       setHistoricalData(null);
     }
   }, [resetTrigger]);
+
+  useEffect(() => {
+    const fetchMajorEvents = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/aurora/major-events`);
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        setMajorEvents(data);
+      } catch (err) {
+        console.error('Failed to fetch major events:', err);
+      }
+    };
+    fetchMajorEvents();
+  }, []);
 
   const fetchHistoricalData = async (targetDate) => {
     setLoading(true);
@@ -244,6 +348,48 @@ export default function Timeline({
     setStormMode('live');
   };
 
+  const handleEventClick = (eventDate) => {
+    const dateObj = new Date(eventDate);
+    const eventYear = dateObj.getFullYear();
+    const eventDay = getDayOfYear(dateObj);
+
+    setYear(eventYear);
+    setDay(eventDay);
+    setStormMode('historical');
+    fetchHistoricalData(dateObj);
+  };
+
+  const handleStep = (direction) => {
+    let nextDay = day + direction;
+    let nextYear = year;
+
+    if (nextDay < 1) {
+      const currentIndex = AVAILABLE_YEARS.indexOf(year);
+      if (currentIndex > 0) {
+        nextYear = AVAILABLE_YEARS[currentIndex - 1];
+        const isLeap =
+          (nextYear % 4 === 0 && nextYear % 100 !== 0) || nextYear % 400 === 0;
+        nextDay = isLeap ? 366 : 365;
+      } else {
+        return;
+      }
+    } else if (nextDay > maxDays) {
+      const currentIndex = AVAILABLE_YEARS.indexOf(year);
+      if (currentIndex !== -1 && currentIndex < AVAILABLE_YEARS.length - 1) {
+        nextYear = AVAILABLE_YEARS[currentIndex + 1];
+        nextDay = 1;
+      } else {
+        return;
+      }
+    }
+
+    setYear(nextYear);
+    setDay(nextDay);
+    setStormMode('historical');
+    const newDate = getDateFromDayOfYear(nextYear, nextDay);
+    fetchHistoricalData(newDate);
+  };
+
   const handleSliderChange = (e) => {
     setDay(parseInt(e.target.value, 10));
   };
@@ -258,7 +404,7 @@ export default function Timeline({
   let gValueColor = 'rgba(255, 255, 255, 0.6)';
 
   if (stormMode === 'live') {
-    gValueText = 'Real-time NOAA data';
+    gValueText = 'Real-time, geographically-weighted NOAA data';
     gValueColor = 'rgba(140, 255, 210, 1)';
   } else if (historicalData && !historicalData.error) {
     // Map max Kp to G-scale
@@ -282,13 +428,10 @@ export default function Timeline({
     gValueColor = '#ff4d4d';
   }
 
-  const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-  let maxDays = isLeapYear ? 366 : 365;
-
-  const today = new Date();
-  if (year === today.getFullYear()) {
-    maxDays = Math.min(maxDays, getDayOfYear(today));
-  }
+  const filteredEvents = majorEvents.filter((event) => {
+    const eventDate = new Date(event.date);
+    return eventDate.getFullYear() === year;
+  });
 
   return (
     <Container $isMobile={isMobile}>
@@ -316,15 +459,64 @@ export default function Timeline({
         </YearButtonsGroup>
       </HeaderRow>
 
-      <RangeInput
-        type="range"
-        min="1"
-        max={maxDays}
-        value={day}
-        onChange={handleSliderChange}
-        onMouseUp={handleSliderRelease}
-        onTouchEnd={handleSliderRelease}
-      />
+      <ScrubberRow>
+        <ChevronButton
+          onClick={() => handleStep(-1)}
+          disabled={day <= 1 && AVAILABLE_YEARS.indexOf(year) === 0}
+          title="Previous day">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </ChevronButton>
+
+        <RangeInput
+          type="range"
+          min="1"
+          max={maxDays}
+          value={day}
+          onChange={handleSliderChange}
+          onMouseUp={handleSliderRelease}
+          onTouchEnd={handleSliderRelease}
+        />
+
+        <ChevronButton
+          onClick={() => handleStep(1)}
+          disabled={
+            day >= maxDays &&
+            AVAILABLE_YEARS.indexOf(year) === AVAILABLE_YEARS.length - 1
+          }
+          title="Next day">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </ChevronButton>
+      </ScrubberRow>
+
+      {filteredEvents.length > 0 && (
+        <EventsGroup>
+          {filteredEvents.map((event, idx) => (
+            <EventButton
+              key={`${event.date}-${idx}`}
+              $gValue={event.g_value}
+              onClick={() => handleEventClick(event.date)}
+              title={event.notes}>
+              {event.name}
+            </EventButton>
+          ))}
+        </EventsGroup>
+      )}
     </Container>
   );
 }
