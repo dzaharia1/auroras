@@ -1,6 +1,7 @@
 import { Suspense, useState, useMemo, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { Preload } from '@react-three/drei';
+import PropTypes from 'prop-types';
 import Earth from './components/Earth';
 import Overlay from './components/Overlay';
 import ViewControlPanel from './components/view-controls/ViewControlPanel';
@@ -14,6 +15,36 @@ import './index.css';
 // Pre-generate storm data once (expensive, ~10k points)
 const STORM_DATA = generateStormOvation();
 const SUBSTORM_DATA = generateSubstormOvation();
+
+// Component to manage camera position for an oblique North Pole view
+function NorthPoleCamera({ zoomRadius = 25 }) {
+  const { camera, size } = useThree();
+
+  useEffect(() => {
+    const aspect = size.width / size.height;
+    const vFovRad = (camera.fov * Math.PI) / 180;
+    const hFovRad = 2 * Math.atan(Math.tan(vFovRad / 2) * aspect);
+
+    // Standard distance to fit the radius horizontally
+    const distance = zoomRadius / Math.sin(hFovRad / 2);
+
+    // Position the camera at a steep angle
+    // tiltAngle = Math.PI * 0.25 is 45 degrees
+    const tiltAngle = Math.PI * 0.28;
+    const y = distance * Math.cos(tiltAngle);
+    const z = distance * Math.sin(tiltAngle);
+
+    camera.position.set(0, y, z);
+    camera.lookAt(0, 12, 0); // Targeted focus on the upper hemisphere
+    camera.updateProjectionMatrix();
+  }, [camera, size, zoomRadius]);
+
+  return null;
+}
+
+NorthPoleCamera.propTypes = {
+  zoomRadius: PropTypes.number,
+};
 
 function App() {
   const spaceWeather = useSpaceWeather();
@@ -86,12 +117,13 @@ function App() {
       />
 
       <div className="canvas-container">
-        <Canvas camera={{ position: [0, 8, 18], fov: 45 }}>
+        <Canvas camera={{ position: [0, 50, 0], fov: 45 }}>
           <color attach="background" args={['#000005']} />
+          <NorthPoleCamera zoomRadius={14} />
           <ambientLight intensity={0.2} />
           <Suspense fallback={null}>
             <Earth
-              position={[0, -16, 0]}
+              position={[0, 0, 0]}
               spaceWeather={effectiveSpaceWeather}
               autoRotate={autoRotate}
             />
