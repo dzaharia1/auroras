@@ -90,6 +90,11 @@ function populateMesh(mesh, coords, earthRadius) {
   mesh.count = count;
   mesh.instanceMatrix.needsUpdate = true;
   if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  // Force shader recompile so Three.js picks up USE_INSTANCING_COLOR now that
+  // the instanceColor buffer exists. Without this, the shader compiled on
+  // frame 0 (before setColorAt was called) lacks the attribute and the
+  // per-instance colors are silently ignored.
+  if (mesh.material) mesh.material.needsUpdate = true;
 
   console.log('[Aurora] rendered', count, 'curtains');
 }
