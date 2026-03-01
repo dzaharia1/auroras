@@ -7,14 +7,51 @@ import Timeline from './Timeline';
 import StormSimulators from './StormSimulators';
 import Button from '../common/Button';
 
-const MobileToggleWrapper = styled.div`
+const MobileBottomRow = styled.div`
   display: none;
   @media (max-width: 1280px) {
-    display: block;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     position: absolute;
     bottom: calc(2rem + env(safe-area-inset-bottom));
-    right: calc(2.5rem + env(safe-area-inset-right));
+    left: calc(2rem + env(safe-area-inset-left));
+    right: calc(2rem + env(safe-area-inset-right));
+    gap: 1rem;
     z-index: 20;
+  }
+`;
+
+const ZoomSliderContainer = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0 1rem;
+  height: 48px;
+`;
+
+const ZoomSlider = styled.input`
+  flex: 1;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.1);
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #8cffd2;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(100, 255, 210, 0.5);
   }
 `;
 
@@ -81,6 +118,8 @@ export default function ViewControlPanel({
   setStormMode,
   handleHistoricalData,
   resetTrigger,
+  zoomRadius,
+  onZoomChange,
 }) {
   const [showControls, setShowControls] = useState(false);
 
@@ -98,12 +137,25 @@ export default function ViewControlPanel({
       </DesktopContainer>
 
       {!showControls && (
-        <MobileToggleWrapper>
-          <Button onClick={() => setShowControls(true)}>
+        <MobileBottomRow>
+          <ZoomSliderContainer>
+            <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Zoom</span>
+            <ZoomSlider
+              type="range"
+              min="10"
+              max="40"
+              step="0.1"
+              value={zoomRadius}
+              onChange={(e) => onZoomChange(parseFloat(e.target.value))}
+            />
+          </ZoomSliderContainer>
+          <Button
+            onClick={() => setShowControls(true)}
+            style={{ height: '48px' }}>
             <Settings2 size={18} />
-            View Controls
+            Controls
           </Button>
-        </MobileToggleWrapper>
+        </MobileBottomRow>
       )}
 
       <MobileOverlay $isOpen={showControls}>
@@ -141,4 +193,6 @@ ViewControlPanel.propTypes = {
   setStormMode: PropTypes.func.isRequired,
   handleHistoricalData: PropTypes.func.isRequired,
   resetTrigger: PropTypes.number.isRequired,
+  zoomRadius: PropTypes.number.isRequired,
+  onZoomChange: PropTypes.func.isRequired,
 };

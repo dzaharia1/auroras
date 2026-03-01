@@ -18,26 +18,48 @@ const STORM_DATA = generateStormOvation();
 const SUBSTORM_DATA = generateSubstormOvation();
 const QUIET_DATA = generateQuietOvation();
 
+// Tunable camera constants
+const CAMERA_TILT_DEG = 55; // Degrees from horizontal (looking down)
+const CAMERA_FOCUS_HEIGHT = 15; // Focus point height (Earth radius is 18)
+const CAMERA_ZOOM_RADIUS = 16; // Controls how much of the globe fills the width
+
 // Component to manage camera position for an oblique North Pole view
-function NorthPoleCamera({ zoomRadius = 25 }) {
-  const { camera, size } = useThree();
+function NorthPoleCamera({ zoomRadius, onZoomChange }) {
+  const { camera, size, gl } = useThree();
+
+  useEffect(() => {
+    const handleWheel = (e) => {
+      e.preventDefault();
+      onZoomChange(Math.max(10, Math.min(40, zoomRadius + e.deltaY * 0.01)));
+    };
+
+    const el = gl.domElement;
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, [gl, zoomRadius, onZoomChange]);
 
   useEffect(() => {
     const aspect = size.width / size.height;
     const vFovRad = (camera.fov * Math.PI) / 180;
     const hFovRad = 2 * Math.atan(Math.tan(vFovRad / 2) * aspect);
 
-    // Standard distance to fit the radius horizontally
+    // Dynamic distance based on the current zoomRadius
     const distance = zoomRadius / Math.sin(hFovRad / 2);
 
-    // Position the camera at a steep angle
-    // tiltAngle = Math.PI * 0.25 is 45 degrees
-    const tiltAngle = Math.PI * 0.28;
-    const y = distance * Math.cos(tiltAngle);
-    const z = distance * Math.sin(tiltAngle);
+    // Angle from vertical (Y-axis) is 90 minus tilt from horizontal
+    const tiltRad = ((90 - CAMERA_TILT_DEG) * Math.PI) / 180;
+
+    const y = distance * Math.cos(tiltRad);
+    const z = distance * Math.sin(tiltRad);
 
     camera.position.set(0, y, z);
-    camera.lookAt(0, 12, 0); // Targeted focus on the upper hemisphere
+
+    // Dynamic focus: as we zoom out (larger zoomRadius), we pan the camera down (lower lookAt height)
+    // This shifts the Earth slightly upwards in the viewport as it gets smaller.
+    const zoomFactor = (zoomRadius - 10) / 30; // 0 to 1 based on current zoom range
+    const currentFocusY = CAMERA_FOCUS_HEIGHT - zoomFactor * 10;
+
+    camera.lookAt(0, currentFocusY, 0);
     camera.updateProjectionMatrix();
   }, [camera, size, zoomRadius]);
 
@@ -45,7 +67,8 @@ function NorthPoleCamera({ zoomRadius = 25 }) {
 }
 
 NorthPoleCamera.propTypes = {
-  zoomRadius: PropTypes.number,
+  zoomRadius: PropTypes.number.isRequired,
+  onZoomChange: PropTypes.func.isRequired,
 };
 
 function App() {
@@ -53,6 +76,7 @@ function App() {
   const [stormMode, setStormMode] = useState('live');
   const [autoRotate, setAutoRotate] = useState(false);
   const [historicalSpaceWeather, setHistoricalSpaceWeather] = useState(null);
+  const [zoomRadius, setZoomRadius] = useState(CAMERA_ZOOM_RADIUS); // Moved zoomRadius state to App
 
   const [resetTrigger, setResetTrigger] = useState(0);
 
@@ -116,12 +140,17 @@ function App() {
         setStormMode={setStormMode}
         handleHistoricalData={handleHistoricalData}
         resetTrigger={resetTrigger}
+        zoomRadius={zoomRadius}
+        onZoomChange={setZoomRadius}
       />
 
       <div className="canvas-container">
         <Canvas camera={{ position: [0, 50, 0], fov: 45 }}>
           <color attach="background" args={['#000005']} />
-          <NorthPoleCamera zoomRadius={14} />
+          <NorthPoleCamera
+            zoomRadius={zoomRadius}
+            onZoomChange={setZoomRadius}
+          />
           <ambientLight intensity={0.2} />
           <Suspense fallback={null}>
             <Earth

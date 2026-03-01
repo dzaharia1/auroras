@@ -2,6 +2,7 @@ import { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
+import PropTypes from 'prop-types';
 import AuroraCurtains from './AuroraCurtains';
 
 // Calculates the direction to the Sun in the Earth's local coordinate space based on UTC time
@@ -126,7 +127,7 @@ export default function Earth({ position, spaceWeather, autoRotate }) {
       previousX.current = e.clientX;
 
       // Use a consistent screen-space rotation factor
-      const factor = -(deltaX / window.innerWidth) * 3.14159 * 2.5;
+      const factor = (deltaX / window.innerWidth) * 3.14159 * 2.5;
 
       if (earthRef.current) earthRef.current.rotation.y += factor;
       if (auroraRef.current) auroraRef.current.rotation.y += factor;
@@ -181,3 +182,13 @@ export default function Earth({ position, spaceWeather, autoRotate }) {
     </group>
   );
 }
+
+Earth.propTypes = {
+  position: PropTypes.arrayOf(PropTypes.number),
+  spaceWeather: PropTypes.shape({
+    ovation: PropTypes.shape({
+      coordinates: PropTypes.array,
+    }),
+  }),
+  autoRotate: PropTypes.bool,
+};
