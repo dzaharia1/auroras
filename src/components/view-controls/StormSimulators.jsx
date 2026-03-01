@@ -21,7 +21,7 @@ const Label = styled.span`
 const ButtonRow = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${(props) => (props.$isMobile ? '16px' : '0.5rem')};
+  gap: ${(props) => (props.$isMobile ? '.75rem' : '0.5rem')};
   width: 100%;
 
   @media (max-width: 1280px) {

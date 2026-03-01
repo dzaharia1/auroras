@@ -5,6 +5,7 @@ import { Settings2, X } from 'lucide-react';
 import PlayPause from './PlayPause';
 import Timeline from './Timeline';
 import StormSimulators from './StormSimulators';
+import ZoomControl from './ZoomControl';
 import Button from '../common/Button';
 
 const MobileBottomRow = styled.div`
@@ -14,44 +15,11 @@ const MobileBottomRow = styled.div`
     flex-direction: row;
     align-items: center;
     position: absolute;
-    bottom: calc(2rem + env(safe-area-inset-bottom));
-    left: calc(2rem + env(safe-area-inset-left));
-    right: calc(2rem + env(safe-area-inset-right));
-    gap: 1rem;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    left: calc(1.5rem + env(safe-area-inset-left));
+    right: calc(1.5rem + env(safe-area-inset-right));
+    gap: 0.75rem;
     z-index: 20;
-  }
-`;
-
-const ZoomSliderContainer = styled.div`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 0 1rem;
-  height: 48px;
-`;
-
-const ZoomSlider = styled.input`
-  flex: 1;
-  -webkit-appearance: none;
-  background: rgba(255, 255, 255, 0.1);
-  height: 4px;
-  border-radius: 2px;
-  outline: none;
-
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #8cffd2;
-    cursor: pointer;
-    box-shadow: 0 0 10px rgba(100, 255, 210, 0.5);
   }
 `;
 
@@ -138,17 +106,7 @@ export default function ViewControlPanel({
 
       {!showControls && (
         <MobileBottomRow>
-          <ZoomSliderContainer>
-            <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Zoom</span>
-            <ZoomSlider
-              type="range"
-              min="10"
-              max="40"
-              step="0.1"
-              value={zoomRadius}
-              onChange={(e) => onZoomChange(parseFloat(e.target.value))}
-            />
-          </ZoomSliderContainer>
+          <ZoomControl zoomRadius={zoomRadius} onZoomChange={onZoomChange} />
           <Button
             onClick={() => setShowControls(true)}
             style={{ height: '48px' }}>
