@@ -90,11 +90,6 @@ function populateMesh(mesh, coords, earthRadius) {
   mesh.count = count;
   mesh.instanceMatrix.needsUpdate = true;
   if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  // Force shader recompile so Three.js picks up USE_INSTANCING_COLOR now that
-  // the instanceColor buffer exists. Without this, the shader compiled on
-  // frame 0 (before setColorAt was called) lacks the attribute and the
-  // per-instance colors are silently ignored.
-  if (mesh.material) mesh.material.needsUpdate = true;
 
   console.log('[Aurora] rendered', count, 'curtains');
 }
@@ -114,6 +109,17 @@ export default function AuroraCurtains({
   const setMeshRef = useCallback((node) => {
     meshRef.current = node;
     if (node) {
+      // Pre-allocate instanceColor so Three.js compiles the shader with
+      // USE_INSTANCING_COLOR on frame 0. When textures are cached the mesh
+      // mounts before API data arrives, so setColorAt hasn't been called yet
+      // and the shader would compile without the define. material.needsUpdate
+      // alone is not reliable for adding a new attribute retroactively.
+      if (!node.instanceColor) {
+        node.instanceColor = new THREE.InstancedBufferAttribute(
+          new Float32Array(MAX_INSTANCES * 3),
+          3,
+        );
+      }
       const { spaceWeather: sw, earthRadius: er } = propsRef.current;
       populateMesh(node, sw?.ovation?.coordinates, er);
     }
