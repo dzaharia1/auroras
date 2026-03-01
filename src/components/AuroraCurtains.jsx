@@ -88,8 +88,12 @@ function populateMesh(mesh, coords, earthRadius) {
   }
 
   mesh.count = count;
+  mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   mesh.instanceMatrix.needsUpdate = true;
-  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  if (mesh.instanceColor) {
+    mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+    mesh.instanceColor.needsUpdate = true;
+  }
 
   console.log('[Aurora] rendered', count, 'curtains');
 }
@@ -118,7 +122,7 @@ export default function AuroraCurtains({
         node.instanceColor = new THREE.InstancedBufferAttribute(
           new Float32Array(MAX_INSTANCES * 3),
           3,
-        );
+        ).setUsage(THREE.DynamicDrawUsage);
       }
       const { spaceWeather: sw, earthRadius: er } = propsRef.current;
       populateMesh(node, sw?.ovation?.coordinates, er);
@@ -147,6 +151,13 @@ export default function AuroraCurtains({
         uniforms: { time: { value: 0 } },
         vertexShader: `
       ${NOISE_GLSL}
+      #ifndef USE_INSTANCING
+        attribute mat4 instanceMatrix;
+      #endif
+      #ifndef USE_INSTANCING_COLOR
+        attribute vec3 instanceColor;
+      #endif
+
       uniform float time;
       varying vec2 vUv;
       varying vec3 vColor;
