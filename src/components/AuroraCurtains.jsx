@@ -61,12 +61,13 @@ function populateMesh(mesh, coords, earthRadius) {
   for (let i = 0; i < count; i++) {
     const [lon, lat, val] = filtered[i];
 
-    // Spherical → Cartesian (Three.js Y-up)
-    const phi = (90 - lat) * (Math.PI / 180);
-    const theta = (lon + 180) * (Math.PI / 180);
-    const x = earthRadius * Math.sin(phi) * Math.sin(theta);
-    const y = earthRadius * Math.cos(phi);
-    const z = -earthRadius * Math.sin(phi) * Math.cos(theta);
+    // Spherical → Cartesian (Matching SphereGeometry mapping where Lon 0 is at +X)
+    const phi_map = Math.PI + (lon * Math.PI) / 180;
+    const theta_map = ((90 - lat) * Math.PI) / 180;
+
+    const x = -earthRadius * Math.sin(theta_map) * Math.cos(phi_map);
+    const y = earthRadius * Math.cos(theta_map);
+    const z = earthRadius * Math.sin(theta_map) * Math.sin(phi_map);
 
     // Orient plane so local Y points radially outward
     const normal = new THREE.Vector3(x, y, z).normalize();

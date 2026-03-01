@@ -9,6 +9,7 @@ function getSubsolarVector(date) {
   const dayOfYear = Math.floor(
     (date - new Date(date.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24,
   );
+  // Solar declination (tilt relative to equator)
   const declinationRad =
     ((23.44 * Math.PI) / 180) *
     Math.sin((2 * Math.PI * (dayOfYear - 81)) / 365);
@@ -17,15 +18,19 @@ function getSubsolarVector(date) {
     date.getUTCMinutes() / 60 +
     date.getUTCSeconds() / 3600;
 
-  // 360 degrees in 24 hours. At 12:00 UTC, sun is at Lon 0.
-  const lonDeg = (12 - timeHours) * 15;
-  const lonRad = (lonDeg * Math.PI) / 180;
+  // Calculate longitude where sun is overhead. Noon UTC (12:00) is Lon 0.
+  // We subtract 1 to nudge the terminator ~15 degrees West for better visual alignment.
+  const lonRad = ((11 - timeHours) * 15 * Math.PI) / 180;
 
-  // Convert standard geographic coordinates to Three.js SphereGeometry local Cartesian coordinates.
-  // u=0.5 (Lon 0) maps to -Z, u=0.75 (Lon 90E) maps to +X
-  const x = Math.cos(declinationRad) * Math.sin(lonRad);
-  const y = Math.sin(declinationRad);
-  const z = -Math.cos(declinationRad) * Math.cos(lonRad);
+  // Standard Three.js SphereGeometry mapping coordinates:
+  // u=0.5 (Lon 0) is at +X. u=0.75 (Lon 90E) is at -Z.
+  // Formula: phi = PI + lonRad
+  const theta = Math.PI / 2 - declinationRad;
+  const phi = Math.PI + lonRad;
+
+  const x = -Math.sin(theta) * Math.cos(phi);
+  const y = Math.cos(theta);
+  const z = Math.sin(theta) * Math.sin(phi);
 
   return new THREE.Vector3(x, y, z).normalize();
 }
@@ -75,8 +80,7 @@ export default function Earth({ position, spaceWeather }) {
                 vec3 nightColor = texture2D(nightTexture, vUv).rgb;
                 
                 // 1.0 = direct sunlight, -1.0 = pitch black night
-                // FLIPPED sunDirection to fix day/night inversion bug
-                float intensity = dot(normalize(vNormalLocal), -sunDirection);
+                float intensity = dot(normalize(vNormalLocal), sunDirection);
                 
                 // Blend day and night over a smooth terminator line
                 float blend = smoothstep(-0.2, 0.2, intensity);
