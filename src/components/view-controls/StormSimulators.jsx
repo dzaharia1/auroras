@@ -20,9 +20,13 @@ const Label = styled.span`
 
 const ButtonRow = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: ${(props) => (props.$isMobile ? '16px' : '0.5rem')};
   width: 100%;
+
+  @media (max-width: 1280px) {
+    flex-direction: row;
+  }
 `;
 
 const MODES = [
@@ -34,7 +38,7 @@ export default function StormSimulators({ stormMode, onChange, isMobile }) {
   return (
     <Container $isMobile={isMobile}>
       {isMobile ? (
-        <Label>Simulate storm intensity</Label>
+        <Label>Storm intensity simulator</Label>
       ) : (
         <Label>Simulation</Label>
       )}

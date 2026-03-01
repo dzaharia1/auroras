@@ -230,6 +230,14 @@ const LoadingSpinner = styled.div`
   }
 `;
 
+const Label = styled.span`
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 0.25rem;
+`;
+
 function getDayOfYear(date) {
   const start = new Date(date.getFullYear(), 0, 0);
   const diff = date - start;
@@ -435,6 +443,7 @@ export default function Timeline({
 
   return (
     <Container $isMobile={isMobile}>
+      <Label>Historical Timeline</Label>
       <HeaderRow>
         <InfoBox>
           <DateDisplay>

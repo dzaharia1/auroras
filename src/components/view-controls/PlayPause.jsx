@@ -21,21 +21,13 @@ const Label = styled.span`
 export default function PlayPause({ autoRotate, onToggle, isMobile }) {
   return (
     <Container $isMobile={isMobile}>
-      {!isMobile && <Label>World</Label>}
+      <Label>Rotation</Label>
       <Button
         onClick={onToggle}
         fullWidth={isMobile}
         align={isMobile ? 'center' : 'flex-start'}
         minWidth="120px">
         <span>{autoRotate ? '⏸ Pause' : '▶️ Play'}</span>
-        <span
-          style={{
-            fontSize: '0.7rem',
-            opacity: 0.5,
-            textTransform: 'uppercase',
-          }}>
-          Rotation
-        </span>
       </Button>
     </Container>
   );

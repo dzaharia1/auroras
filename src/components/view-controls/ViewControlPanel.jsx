@@ -45,7 +45,7 @@ const MobileOverlay = styled.div`
     display: ${(props) => (props.$isOpen ? 'flex' : 'none')};
     flex-direction: column;
     justify-content: flex-end;
-    gap: 1.5rem;
+    gap: 2rem;
     position: absolute;
     top: 0;
     left: 0;
@@ -109,16 +109,17 @@ export default function ViewControlPanel({
       <MobileOverlay $isOpen={showControls}>
         <div style={{ flex: 1 }} onClick={() => setShowControls(false)} />
         <PlayPause autoRotate={autoRotate} onToggle={onToggleRotate} isMobile />
+
+        <StormSimulators
+          stormMode={stormMode}
+          onChange={setStormMode}
+          isMobile
+        />
         <Timeline
           onDataFetched={handleHistoricalData}
           resetTrigger={resetTrigger}
           stormMode={stormMode}
           setStormMode={setStormMode}
-          isMobile
-        />
-        <StormSimulators
-          stormMode={stormMode}
-          onChange={setStormMode}
           isMobile
         />
         <Button
