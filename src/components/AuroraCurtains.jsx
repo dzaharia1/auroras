@@ -194,6 +194,7 @@ export default function AuroraCurtains({
     <instancedMesh
       ref={setMeshRef}
       args={[geometry, material, MAX_INSTANCES]}
+      frustumCulled={false}
     />
   );
 }
