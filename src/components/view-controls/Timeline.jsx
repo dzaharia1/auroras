@@ -27,11 +27,23 @@ const HeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  @media (max-width: 1280px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;
 
 const InfoBox = styled.div`
   display: flex;
   flex-direction: column;
+
+  @media (max-width: 1280px) {
+    flex-direction: row;
+    gap: 1rem;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const DateDisplay = styled.div`

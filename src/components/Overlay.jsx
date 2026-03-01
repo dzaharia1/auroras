@@ -8,11 +8,16 @@ const Container = styled.div`
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   z-index: 10;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 2rem;
+  padding-bottom: calc(2.2rem + env(safe-area-inset-bottom));
+  padding-top: calc(2.2rem + env(safe-area-inset-top));
+  padding-left: calc(2.2rem + env(safe-area-inset-left));
+  padding-right: calc(2.2rem + env(safe-area-inset-right));
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
   color: white;

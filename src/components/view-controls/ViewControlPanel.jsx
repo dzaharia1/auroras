@@ -12,8 +12,8 @@ const MobileToggleWrapper = styled.div`
   @media (max-width: 1280px) {
     display: block;
     position: absolute;
-    bottom: 2rem;
-    right: 2rem;
+    bottom: calc(2rem + env(safe-area-inset-bottom));
+    right: calc(2.5rem + env(safe-area-inset-right));
     z-index: 20;
   }
 `;
@@ -51,11 +51,15 @@ const MobileOverlay = styled.div`
     left: 0;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     z-index: 30;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     padding: 2rem;
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+    padding-left: calc(2rem + env(safe-area-inset-left));
+    padding-right: calc(2rem + env(safe-area-inset-right));
     box-sizing: border-box;
     animation: fadeIn 0.3s ease;
   }

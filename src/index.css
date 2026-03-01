@@ -18,6 +18,7 @@ body {
   padding: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background-color: #000005;
 }
@@ -30,6 +31,7 @@ body {
 .app-container {
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   position: relative;
   overflow: hidden;
   user-select: none;
@@ -57,6 +59,9 @@ body {
   flex-direction: column;
   justify-content: space-between;
   padding: 2rem;
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+  padding-left: calc(2rem + env(safe-area-inset-left));
+  padding-right: calc(2rem + env(safe-area-inset-right));
   box-sizing: border-box;
 }
 
