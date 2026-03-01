@@ -1,9 +1,10 @@
-import React, { Suspense, useState, useMemo } from 'react';
+import { Suspense, useState, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Preload } from '@react-three/drei';
 import Earth from './components/Earth';
 import Overlay from './components/Overlay';
 import StormModePicker from './components/StormModePicker';
+import RotationControl from './components/RotationControl';
 import { useSpaceWeather } from './hooks/useSpaceWeather';
 import {
   generateStormOvation,
@@ -18,6 +19,7 @@ const SUBSTORM_DATA = generateSubstormOvation();
 function App() {
   const spaceWeather = useSpaceWeather();
   const [stormMode, setStormMode] = useState('live');
+  const [autoRotate, setAutoRotate] = useState(false);
 
   // Override ovation coordinates when in demo mode
   const effectiveSpaceWeather = useMemo(() => {
@@ -32,6 +34,10 @@ function App() {
   return (
     <div className="app-container">
       <Overlay spaceWeather={effectiveSpaceWeather} stormMode={stormMode} />
+      <RotationControl
+        autoRotate={autoRotate}
+        onToggle={() => setAutoRotate(!autoRotate)}
+      />
       <StormModePicker stormMode={stormMode} onChange={setStormMode} />
 
       <div className="canvas-container">
@@ -42,6 +48,7 @@ function App() {
             <Earth
               position={[0, -16, 0]}
               spaceWeather={effectiveSpaceWeather}
+              autoRotate={autoRotate}
             />
             <Preload all />
           </Suspense>

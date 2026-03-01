@@ -1,4 +1,4 @@
-import React, { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
@@ -35,7 +35,7 @@ function getSubsolarVector(date) {
   return new THREE.Vector3(x, y, z).normalize();
 }
 
-export default function Earth({ position, spaceWeather }) {
+export default function Earth({ position, spaceWeather, autoRotate }) {
   const groupRef = useRef();
   const earthRef = useRef();
   const auroraRef = useRef();
@@ -101,7 +101,7 @@ export default function Earth({ position, spaceWeather }) {
     rotationVelocity.current = 0;
   };
 
-  const handlePointerUp = (e) => {
+  const handlePointerUp = () => {
     setIsDragging(false);
   };
 
@@ -129,7 +129,7 @@ export default function Earth({ position, spaceWeather }) {
       if (auroraRef.current) auroraRef.current.rotation.y += step;
 
       rotationVelocity.current *= 0.95;
-      if (Math.abs(rotationVelocity.current) < 0.001) {
+      if (Math.abs(rotationVelocity.current) < 0.001 && autoRotate) {
         earthRef.current.rotation.y += 0.0005;
         if (auroraRef.current) auroraRef.current.rotation.y += 0.0005;
       }

@@ -1,4 +1,4 @@
-import React from 'react';
+// Automatic rotation toggle functionality added near storm modes
 
 export const STORM_MODES = [
   { key: 'live', label: '🛰 Live', description: 'Real-time NOAA data' },

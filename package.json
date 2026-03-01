@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "deploy": "git push origin main && sleep 3 && gh run watch"
+    "deploy": "git push origin main && sleep 3 && gh run watch $(gh run list --limit 1 --json databaseId --jq '.[0].databaseId')"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
