@@ -21,7 +21,7 @@ function getSubsolarVector(date) {
 
   // Calculate longitude where sun is overhead. Noon UTC (12:00) is Lon 0.
   // We subtract 1 to nudge the terminator ~15 degrees West for better visual alignment.
-  const lonRad = ((11 - timeHours) * 15 * Math.PI) / 180;
+  const lonRad = ((11 - timeHours) * 15 * Math.PI) / 180 + 0.15;
 
   // Standard Three.js SphereGeometry mapping coordinates:
   // u=0.5 (Lon 0) is at +X. u=0.75 (Lon 90E) is at -Z.
@@ -36,10 +36,17 @@ function getSubsolarVector(date) {
   return new THREE.Vector3(x, y, z).normalize();
 }
 
-export default function Earth({ position, spaceWeather, autoRotate }) {
+export default function Earth({
+  position,
+  spaceWeather,
+  autoRotate,
+  stormMode,
+  currentDate,
+}) {
   const groupRef = useRef();
   const earthRef = useRef();
   const auroraRef = useRef();
+  const auroraOffsetRef = useRef();
   const { gl } = useThree();
 
   const [dayMap, nightMap] = useTexture([
@@ -152,13 +159,15 @@ export default function Earth({ position, spaceWeather, autoRotate }) {
     // Dynamically update the position of the sun on the globe based on the exact real-world UTC time!
     if (earthMaterial) {
       earthMaterial.uniforms.sunDirection.value.copy(
-        getSubsolarVector(new Date()),
+        getSubsolarVector(currentDate || new Date()),
       );
     }
 
     if (earthRef.current && !isDragging.current) {
       const step = rotationVelocity.current;
       earthRef.current.rotation.y += step;
+
+      // Update basic aurora rotation (matching Earth spin)
       if (auroraRef.current) auroraRef.current.rotation.y += step;
 
       rotationVelocity.current *= 0.95;
@@ -167,17 +176,81 @@ export default function Earth({ position, spaceWeather, autoRotate }) {
         if (auroraRef.current) auroraRef.current.rotation.y += 0.0005;
       }
     }
+
+    // Handle aurora geographic/astronomical placement
+    if (auroraRef.current && auroraOffsetRef.current) {
+      if (stormMode === 'live') {
+        // Live mode: Match geography exactly (already doing via rotation.y sync)
+        auroraOffsetRef.current.rotation.set(0, 0, 0);
+      } else {
+        // Historical/Sim mode: Center on Magnetic North + Night-side stretch
+
+        // 1. Magnetic North reference (Earth-relative)
+        const magLatRad = (80.7 * Math.PI) / 180;
+        const magLonRad = ((-72.7 + 180) * Math.PI) / 180;
+
+        const magVector = new THREE.Vector3(
+          -Math.cos(magLatRad) * Math.cos(magLonRad),
+          Math.sin(magLatRad),
+          Math.cos(magLatRad) * Math.sin(magLonRad),
+        ).normalize();
+
+        // 2. Magnetotail shift: push center equatorward away from subsolar point
+        const sunVec = getSubsolarVector(currentDate || new Date());
+        const antiSolarVec = sunVec.clone().negate();
+
+        // Push the center towards the night side by ~5 degrees
+        const shiftAngle = (5.0 * Math.PI) / 180;
+        const dynamicCenter = magVector
+          .clone()
+          .add(antiSolarVec.multiplyScalar(Math.tan(shiftAngle)))
+          .normalize();
+
+        // 3. Orient the offset group to the dynamic center
+        const up = new THREE.Vector3(0, 1, 0);
+        const q = new THREE.Quaternion().setFromUnitVectors(up, dynamicCenter);
+        auroraOffsetRef.current.quaternion.copy(q);
+
+        // 4. Intensity Peak: Face the Night Side (Midnight sector)
+        // Project anti-solar onto the local "Equator" plane of the shifted oval
+        const localNight = antiSolarVec
+          .clone()
+          .projectOnPlane(dynamicCenter)
+          .normalize();
+        const localReference = new THREE.Vector3(0, 1, 0)
+          .projectOnPlane(dynamicCenter)
+          .normalize();
+
+        // Lon 180 (peak) should align with localNight
+        const angle = Math.atan2(
+          localNight.clone().cross(localReference).dot(dynamicCenter),
+          localNight.dot(localReference),
+        );
+
+        // Apply absolute spin rotation.
+        // Re-adding + Math.PI to put the peak intensity on the night side.
+        const spinQ = new THREE.Quaternion().setFromAxisAngle(
+          up,
+          angle + Math.PI,
+        );
+        auroraOffsetRef.current.quaternion.multiply(spinQ);
+      }
+    }
   });
 
   return (
     <group position={position} ref={groupRef}>
-      <mesh ref={earthRef} material={earthMaterial}>
+      {/* Earth Mesh */}
+      <mesh ref={earthRef}>
         <sphereGeometry args={[18, 64, 64]} />
+        <primitive object={earthMaterial} attach="material" />
       </mesh>
 
-      {/* Real-time 3D OVATION Aurora Curtains */}
+      {/* Aurora Group */}
       <group ref={auroraRef}>
-        <AuroraCurtains spaceWeather={spaceWeather} earthRadius={18.0} />
+        <group ref={auroraOffsetRef}>
+          <AuroraCurtains spaceWeather={spaceWeather} earthRadius={18.0} />
+        </group>
       </group>
     </group>
   );
@@ -185,6 +258,8 @@ export default function Earth({ position, spaceWeather, autoRotate }) {
 
 Earth.propTypes = {
   position: PropTypes.arrayOf(PropTypes.number),
+  currentDate: PropTypes.instanceOf(Date),
+  stormMode: PropTypes.string,
   spaceWeather: PropTypes.shape({
     ovation: PropTypes.shape({
       coordinates: PropTypes.array,

@@ -1,4 +1,4 @@
-import { Suspense, useState, useMemo, useEffect } from 'react';
+import { Suspense, useState, useMemo, useEffect, useCallback } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { Preload } from '@react-three/drei';
 import PropTypes from 'prop-types';
@@ -71,12 +71,24 @@ NorthPoleCamera.propTypes = {
   onZoomChange: PropTypes.func.isRequired,
 };
 
+function getDayOfYear(date) {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff =
+    date -
+    start +
+    (start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000;
+  const oneDay = 1000 * 60 * 60 * 24;
+  return Math.floor(diff / oneDay);
+}
+
 function App() {
   const spaceWeather = useSpaceWeather();
   const [stormMode, setStormMode] = useState('live');
   const [autoRotate, setAutoRotate] = useState(false);
   const [historicalSpaceWeather, setHistoricalSpaceWeather] = useState(null);
-  const [zoomRadius, setZoomRadius] = useState(CAMERA_ZOOM_RADIUS); // Moved zoomRadius state to App
+  const [zoomRadius, setZoomRadius] = useState(CAMERA_ZOOM_RADIUS);
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [day, setDay] = useState(getDayOfYear(new Date()));
 
   const [resetTrigger, setResetTrigger] = useState(0);
 
@@ -125,10 +137,21 @@ function App() {
     };
   }, [spaceWeather, stormMode, historicalSpaceWeather]);
 
-  const handleHistoricalData = ({ data }) => {
+  const handleHistoricalData = useCallback(({ data }) => {
     setHistoricalSpaceWeather(data);
     setStormMode('historical');
-  };
+  }, []);
+
+  const currentDate = useMemo(() => {
+    const d = new Date(year, 0, 1);
+    d.setDate(day);
+    // Inherit current time to reflect real-world daylight
+    const now = new Date();
+    d.setHours(now.getHours());
+    d.setMinutes(now.getMinutes());
+    d.setSeconds(now.getSeconds());
+    return d;
+  }, [year, day]);
 
   return (
     <div className="app-container">
@@ -142,6 +165,10 @@ function App() {
         resetTrigger={resetTrigger}
         zoomRadius={zoomRadius}
         onZoomChange={setZoomRadius}
+        year={year}
+        day={day}
+        onYearChange={setYear}
+        onDayChange={setDay}
       />
 
       <div className="canvas-container">
@@ -156,7 +183,9 @@ function App() {
             <Earth
               position={[0, 0, 0]}
               spaceWeather={effectiveSpaceWeather}
+              stormMode={stormMode}
               autoRotate={autoRotate}
+              currentDate={currentDate}
             />
             <Preload all />
           </Suspense>

@@ -96,6 +96,10 @@ export default function ViewControlPanel({
   resetTrigger,
   zoomRadius,
   onZoomChange,
+  year,
+  day,
+  onYearChange,
+  onDayChange,
 }) {
   const [showControls, setShowControls] = useState(false);
 
@@ -111,6 +115,10 @@ export default function ViewControlPanel({
           resetTrigger={resetTrigger}
           stormMode={stormMode}
           setStormMode={setStormMode}
+          year={year}
+          day={day}
+          onYearChange={onYearChange}
+          onDayChange={onDayChange}
         />
         <StormSimulators stormMode={stormMode} onChange={setStormMode} />
       </DesktopContainer>
@@ -142,6 +150,10 @@ export default function ViewControlPanel({
           stormMode={stormMode}
           setStormMode={setStormMode}
           isMobile
+          year={year}
+          day={day}
+          onYearChange={onYearChange}
+          onDayChange={onDayChange}
         />
         <Button
           fullWidth
@@ -164,4 +176,8 @@ ViewControlPanel.propTypes = {
   resetTrigger: PropTypes.number.isRequired,
   zoomRadius: PropTypes.number.isRequired,
   onZoomChange: PropTypes.func.isRequired,
+  year: PropTypes.number.isRequired,
+  day: PropTypes.number.isRequired,
+  onYearChange: PropTypes.func.isRequired,
+  onDayChange: PropTypes.func.isRequired,
 };

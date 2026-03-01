@@ -270,9 +270,11 @@ export default function Timeline({
   stormMode,
   setStormMode,
   isMobile,
+  year,
+  day,
+  onYearChange,
+  onDayChange,
 }) {
-  const [year, setYear] = useState(new Date().getFullYear());
-  const [day, setDay] = useState(getDayOfYear(new Date()));
   const [loading, setLoading] = useState(false);
   const [historicalData, setHistoricalData] = useState(null);
   const [majorEvents, setMajorEvents] = useState([]);
@@ -290,8 +292,8 @@ export default function Timeline({
   // Auto-reset when 'live' mode triggers it
   useEffect(() => {
     if (resetTrigger) {
-      setYear(new Date().getFullYear());
-      setDay(getDayOfYear(new Date()));
+      onYearChange(new Date().getFullYear());
+      onDayChange(getDayOfYear(new Date()));
       setHistoricalData(null);
     }
   }, [resetTrigger]);
@@ -344,8 +346,8 @@ export default function Timeline({
 
     const nextDay = Math.min(day, nextMaxDays);
 
-    setYear(targetYear);
-    setDay(nextDay);
+    onYearChange(targetYear);
+    onDayChange(nextDay);
 
     // Auto-fetch for the new year at the clamped day pointer
     const newDate = getDateFromDayOfYear(targetYear, nextDay);
@@ -361,8 +363,8 @@ export default function Timeline({
     const eventYear = dateObj.getFullYear();
     const eventDay = getDayOfYear(dateObj);
 
-    setYear(eventYear);
-    setDay(eventDay);
+    onYearChange(eventYear);
+    onDayChange(eventDay);
     setStormMode('historical');
     fetchHistoricalData(dateObj);
   };
@@ -391,15 +393,15 @@ export default function Timeline({
       }
     }
 
-    setYear(nextYear);
-    setDay(nextDay);
+    onYearChange(nextYear);
+    onDayChange(nextDay);
     setStormMode('historical');
     const newDate = getDateFromDayOfYear(nextYear, nextDay);
     fetchHistoricalData(newDate);
   };
 
   const handleSliderChange = (e) => {
-    setDay(parseInt(e.target.value, 10));
+    onDayChange(parseInt(e.target.value, 10));
   };
 
   const handleSliderRelease = (e) => {
@@ -536,4 +538,8 @@ Timeline.propTypes = {
   stormMode: PropTypes.string.isRequired,
   setStormMode: PropTypes.func.isRequired,
   isMobile: PropTypes.bool,
+  year: PropTypes.number.isRequired,
+  day: PropTypes.number.isRequired,
+  onYearChange: PropTypes.func.isRequired,
+  onDayChange: PropTypes.func.isRequired,
 };
