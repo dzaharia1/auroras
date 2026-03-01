@@ -6,6 +6,7 @@ import PlayPause from './PlayPause';
 import Timeline from './Timeline';
 import StormSimulators from './StormSimulators';
 import ZoomControl from './ZoomControl';
+import FullscreenControl from './FullscreenControl';
 import Button from '../common/Button';
 
 const MobileBottomRow = styled.div`
@@ -42,6 +43,13 @@ const DesktopContainer = styled.div`
   @media (max-width: 1280px) {
     display: none;
   }
+`;
+
+const VerticalGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
 `;
 
 const MobileOverlay = styled.div`
@@ -94,7 +102,10 @@ export default function ViewControlPanel({
   return (
     <>
       <DesktopContainer>
-        <PlayPause autoRotate={autoRotate} onToggle={onToggleRotate} />
+        <VerticalGroup>
+          <PlayPause autoRotate={autoRotate} onToggle={onToggleRotate} />
+          <FullscreenControl />
+        </VerticalGroup>
         <Timeline
           onDataFetched={handleHistoricalData}
           resetTrigger={resetTrigger}
