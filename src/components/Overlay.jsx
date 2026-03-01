@@ -95,7 +95,7 @@ export default function Overlay({ spaceWeather }) {
     <Container>
       <Header>
         <TitleBox>
-          <Title>Aurora Window</Title>
+          <Title>Aurorae</Title>
           <Subtitle>Real-time space weather dynamics</Subtitle>
         </TitleBox>
       </Header>
