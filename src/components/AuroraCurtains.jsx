@@ -2,6 +2,7 @@ import { useRef, useMemo, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import PropTypes from 'prop-types';
+import { lonLatToWorld, ovationLonToGeo } from '../utils/globe';
 
 const MAX_INSTANCES = 9000;
 const EARTH_RADIUS = 18;
@@ -69,14 +70,7 @@ function populateMesh(mesh, coords, earthRadius) {
   for (let i = 0; i < count; i++) {
     const [lon, lat, val] = filtered[i];
 
-    // Spherical → Cartesian (Matching SphereGeometry mapping where Lon 0 is at +X)
-    // Shift 120 degrees eastward for correct alignment
-    const phi_map = Math.PI + ((lon + 65) * Math.PI) / 180;
-    const theta_map = ((90 - lat) * Math.PI) / 180;
-
-    const x = -earthRadius * Math.sin(theta_map) * Math.cos(phi_map);
-    const y = earthRadius * Math.cos(theta_map);
-    const z = earthRadius * Math.sin(theta_map) * Math.sin(phi_map);
+    const { x, y, z } = lonLatToWorld(ovationLonToGeo(lon), lat, earthRadius);
 
     // Orient plane so local Y points radially outward
     const normal = new THREE.Vector3(x, y, z).normalize();
