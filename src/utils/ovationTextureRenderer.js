@@ -56,13 +56,18 @@ export function generateOvationTexture(coordsData, width = 1024, height = 512) {
     for (let i = 0; i < coordsData.length; i++) {
         const [lon, lat, val] = coordsData[i];
         
-        // Map 0 -> 360 Longitude to X (0 to width)
-        // ThreeJS standard sphere maps UVs such that Prime Meridian is in the center, 
-        // spinning counterclockwise. We align X to this UV layout.
-        let x = (lon / 360.0) * width;
-        // Shift by 90 degrees (width / 4) to align the OVATION longitude (0-360 starting at Greenwhich)
-        // with the ThreeJS sphere UV mapping
-        x = (x + width / 4) % width;
+        // Map Longitude to X (0 to width)
+        // NASA Blue Marble textures have Prime Meridian (Lon 0) at the center (X = width / 2).
+        // Lon 180 and Lon -180 are at the edges (X = width and X = 0).
+        let normalizedLon = lon;
+        if (normalizedLon > 180) {
+            normalizedLon -= 360;
+        }
+
+        // Math:
+        // normalizedLon is -180 to 180.
+        // We want -180 -> 0, 0 -> width / 2, 180 -> width.
+        const x = ((normalizedLon + 180) / 360.0) * width;
         
         // Map -90 -> 90 Latitude to Y (0 to height) 
         // In ThreeJS, Y=0 is the North Pole (top), Y=height is South Pole (bottom)
