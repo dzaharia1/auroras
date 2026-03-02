@@ -1,6 +1,7 @@
 import { useRef, useMemo, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
+import PropTypes from 'prop-types';
 
 const MAX_INSTANCES = 9000;
 const EARTH_RADIUS = 18;
@@ -69,7 +70,8 @@ function populateMesh(mesh, coords, earthRadius) {
     const [lon, lat, val] = filtered[i];
 
     // Spherical → Cartesian (Matching SphereGeometry mapping where Lon 0 is at +X)
-    const phi_map = Math.PI + (lon * Math.PI) / 180;
+    // Shift 120 degrees eastward for correct alignment
+    const phi_map = Math.PI + ((lon + 65) * Math.PI) / 180;
     const theta_map = ((90 - lat) * Math.PI) / 180;
 
     const x = -earthRadius * Math.sin(theta_map) * Math.cos(phi_map);
@@ -201,3 +203,12 @@ export default function AuroraCurtains({
     />
   );
 }
+
+AuroraCurtains.propTypes = {
+  spaceWeather: PropTypes.shape({
+    ovation: PropTypes.shape({
+      coordinates: PropTypes.array,
+    }),
+  }),
+  earthRadius: PropTypes.number,
+};
