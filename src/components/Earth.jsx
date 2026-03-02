@@ -4,37 +4,7 @@ import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import PropTypes from 'prop-types';
 import AuroraCurtains from './AuroraCurtains';
-
-// Calculates the direction to the Sun in the Earth's local coordinate space based on UTC time
-function getSubsolarVector(date) {
-  const dayOfYear = Math.floor(
-    (date - new Date(date.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24,
-  );
-  // Solar declination (tilt relative to equator)
-  const declinationRad =
-    ((23.44 * Math.PI) / 180) *
-    Math.sin((2 * Math.PI * (dayOfYear - 81)) / 365);
-  const timeHours =
-    date.getUTCHours() +
-    date.getUTCMinutes() / 60 +
-    date.getUTCSeconds() / 3600;
-
-  // Calculate longitude where sun is overhead. Noon UTC (12:00) is Lon 0.
-  // We subtract 1 to nudge the terminator ~15 degrees West for better visual alignment.
-  const lonRad = ((11 - timeHours) * 15 * Math.PI) / 180 + 0.15;
-
-  // Standard Three.js SphereGeometry mapping coordinates:
-  // u=0.5 (Lon 0) is at +X. u=0.75 (Lon 90E) is at -Z.
-  // Formula: phi = PI + lonRad
-  const theta = Math.PI / 2 - declinationRad;
-  const phi = Math.PI + lonRad;
-
-  const x = -Math.sin(theta) * Math.cos(phi);
-  const y = Math.cos(theta);
-  const z = Math.sin(theta) * Math.sin(phi);
-
-  return new THREE.Vector3(x, y, z).normalize();
-}
+import { getSubsolarVector, getMagneticNorthVector } from '../utils/geoReference';
 
 const MONTHS = [
   'january',
@@ -202,14 +172,7 @@ export default function Earth({
         // Historical/Sim mode: Center on Magnetic North + Night-side stretch
 
         // 1. Magnetic North reference (Earth-relative)
-        const magLatRad = (80.7 * Math.PI) / 180;
-        const magLonRad = ((-72.7 + 180) * Math.PI) / 180;
-
-        const magVector = new THREE.Vector3(
-          -Math.cos(magLatRad) * Math.cos(magLonRad),
-          Math.sin(magLatRad),
-          Math.cos(magLatRad) * Math.sin(magLonRad),
-        ).normalize();
+        const magVector = getMagneticNorthVector();
 
         // 2. Magnetotail shift: push center equatorward away from subsolar point
         const sunVec = getSubsolarVector(currentDate || new Date());
