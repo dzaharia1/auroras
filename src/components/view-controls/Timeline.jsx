@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { Minimize, Maximize } from 'lucide-react';
 import PropTypes from 'prop-types';
 
 const Container = styled.div`
@@ -14,8 +15,9 @@ const Container = styled.div`
     props.$isMobile ? 'none' : 'blur(12px)'};
   border: ${(props) =>
     props.$isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.1)'};
-  border-radius: 16px;
-  padding: ${(props) => (props.$isMobile ? '0' : '1.5rem 2rem')};
+  border-radius: ${(props) => (props.$minimized ? '12px' : '16px')};
+  padding: ${(props) =>
+    props.$isMobile ? '0' : props.$minimized ? '.45rem 2rem' : '1.5rem 2rem'};
   width: ${(props) => (props.$isMobile ? '100%' : 'auto')};
   font-family: 'Inter', sans-serif;
   color: white;
@@ -25,10 +27,13 @@ const Container = styled.div`
 
 const HeaderRow = styled.div`
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
   align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
 
-  @media (max-width: 1280px) {
+  @media (max-width: 1530px) {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -36,20 +41,22 @@ const HeaderRow = styled.div`
 
 const InfoBox = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  gap: 0.5rem;
 
   @media (max-width: 1280px) {
     flex-direction: row;
-    gap: 1rem;
-    padding-left: 1rem;
-    margin-bottom: 1rem;
+    align-items: baseline;
+    gap: 0.5rem;
   }
 `;
 
-const DateDisplay = styled.div`
+const DateDisplay = styled.h1`
   font-size: 1.2rem;
   font-weight: 600;
   letter-spacing: 0.02em;
+  padding: 0;
+  margin: 0;
 `;
 
 const GValueDisplay = styled.div`
@@ -156,7 +163,21 @@ const ScrubberRow = styled.div`
   gap: 1rem;
 `;
 
-const ChevronButton = styled.button`
+const MinimizeButtonContainer = styled.div`
+  display: flex;
+
+  @media (max-width: 1530px) {
+    position: absolute;
+    top: ${(props) => (props.$minimized ? '.35rem' : '1.5rem')};
+    right: 2rem;
+  }
+
+  @media (max-width: 1280px) {
+    display: none;
+  }
+`;
+
+const IconButton = styled.button`
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
@@ -278,6 +299,7 @@ export default function Timeline({
   const [loading, setLoading] = useState(false);
   const [historicalData, setHistoricalData] = useState(null);
   const [majorEvents, setMajorEvents] = useState([]);
+  const [minimized, setMinimized] = useState(false);
 
   const currentDate = getDateFromDayOfYear(year, day);
 
@@ -288,6 +310,10 @@ export default function Timeline({
   if (year === today.getFullYear()) {
     maxDays = Math.min(maxDays, getDayOfYear(today));
   }
+
+  const toggleMinimizeTimeline = () => {
+    setMinimized((prev) => !prev);
+  };
 
   // Auto-reset when 'live' mode triggers it
   useEffect(() => {
@@ -414,7 +440,7 @@ export default function Timeline({
   let gValueColor = 'rgba(255, 255, 255, 0.6)';
 
   if (stormMode === 'live') {
-    gValueText = 'Real-time, geographically-weighted NOAA data';
+    gValueText = 'Real-time, geographically-weighted data';
     gValueColor = 'rgba(140, 255, 210, 1)';
   } else if (historicalData && !historicalData.error) {
     // Map max Kp to G-scale
@@ -444,8 +470,7 @@ export default function Timeline({
   });
 
   return (
-    <Container $isMobile={isMobile}>
-      <Label>Historical Timeline</Label>
+    <Container $isMobile={isMobile} $minimized={minimized}>
       <HeaderRow>
         <InfoBox>
           <DateDisplay>
@@ -455,78 +480,91 @@ export default function Timeline({
             {loading ? <LoadingSpinner /> : gValueText}
           </GValueDisplay>
         </InfoBox>
-        <YearButtonsGroup>
-          {AVAILABLE_YEARS.map((y) => (
-            <YearButton
-              key={y}
-              $active={year === y && stormMode === 'historical'}
-              onClick={() => handleYearClick(y)}>
-              {y}
-            </YearButton>
-          ))}
-          <LiveButton $active={stormMode === 'live'} onClick={handleLiveClick}>
-            Live
-          </LiveButton>
-        </YearButtonsGroup>
+        {minimized ? null : (
+          <YearButtonsGroup>
+            {AVAILABLE_YEARS.map((y) => (
+              <YearButton
+                key={y}
+                $active={year === y && stormMode === 'historical'}
+                onClick={() => handleYearClick(y)}>
+                {y}
+              </YearButton>
+            ))}
+            <LiveButton
+              $active={stormMode === 'live'}
+              onClick={handleLiveClick}>
+              Live
+            </LiveButton>
+          </YearButtonsGroup>
+        )}
+        <MinimizeButtonContainer $minimized={minimized}>
+          <IconButton onClick={toggleMinimizeTimeline} title="Toggle timeline">
+            {minimized ? <Maximize /> : <Minimize />}
+          </IconButton>
+        </MinimizeButtonContainer>
       </HeaderRow>
 
-      <ScrubberRow>
-        <ChevronButton
-          onClick={() => handleStep(-1)}
-          disabled={day <= 1 && AVAILABLE_YEARS.indexOf(year) === 0}
-          title="Previous day">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </ChevronButton>
+      {!minimized && (
+        <>
+          <ScrubberRow>
+            <IconButton
+              onClick={() => handleStep(-1)}
+              disabled={day <= 1 && AVAILABLE_YEARS.indexOf(year) === 0}
+              title="Previous day">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </IconButton>
 
-        <RangeInput
-          type="range"
-          min="1"
-          max={maxDays}
-          value={day}
-          onChange={handleSliderChange}
-          onMouseUp={handleSliderRelease}
-          onTouchEnd={handleSliderRelease}
-        />
+            <RangeInput
+              type="range"
+              min="1"
+              max={maxDays}
+              value={day}
+              onChange={handleSliderChange}
+              onMouseUp={handleSliderRelease}
+              onTouchEnd={handleSliderRelease}
+            />
 
-        <ChevronButton
-          onClick={() => handleStep(1)}
-          disabled={
-            day >= maxDays &&
-            AVAILABLE_YEARS.indexOf(year) === AVAILABLE_YEARS.length - 1
-          }
-          title="Next day">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </ChevronButton>
-      </ScrubberRow>
+            <IconButton
+              onClick={() => handleStep(1)}
+              disabled={
+                day >= maxDays &&
+                AVAILABLE_YEARS.indexOf(year) === AVAILABLE_YEARS.length - 1
+              }
+              title="Next day">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </IconButton>
+          </ScrubberRow>
 
-      {filteredEvents.length > 0 && (
-        <EventsGroup>
-          {filteredEvents.map((event, idx) => (
-            <EventButton
-              key={`${event.date}-${idx}`}
-              $gValue={event.g_value}
-              onClick={() => handleEventClick(event.date)}
-              title={event.notes}>
-              {event.name}
-            </EventButton>
-          ))}
-        </EventsGroup>
+          {filteredEvents.length > 0 && (
+            <EventsGroup>
+              {filteredEvents.map((event, idx) => (
+                <EventButton
+                  key={`${event.date}-${idx}`}
+                  $gValue={event.g_value}
+                  onClick={() => handleEventClick(event.date)}
+                  title={event.notes}>
+                  {event.name}
+                </EventButton>
+              ))}
+            </EventsGroup>
+          )}
+        </>
       )}
     </Container>
   );

@@ -135,13 +135,13 @@ export default function Overlay({ spaceWeather }) {
       <Container>
         <Header>
           <TitleBox>
-            <Title>Aurorae</Title>
+            <Title>Space Weather</Title>
             <SourcesButton onClick={() => setShowSources(true)}>
               <Info size={14} />
               Sources
             </SourcesButton>
           </TitleBox>
-          <Subtitle>Real-time space weather dynamics</Subtitle>
+          <Subtitle>Real-time and historical space weather dynamics</Subtitle>
         </Header>
       </Container>
 

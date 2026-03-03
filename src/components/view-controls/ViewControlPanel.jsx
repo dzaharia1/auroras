@@ -106,10 +106,7 @@ export default function ViewControlPanel({
   return (
     <>
       <DesktopContainer>
-        <VerticalGroup>
-          <PlayPause autoRotate={autoRotate} onToggle={onToggleRotate} />
-          <FullscreenControl />
-        </VerticalGroup>
+        <PlayPause autoRotate={autoRotate} onToggle={onToggleRotate} />
         <Timeline
           onDataFetched={handleHistoricalData}
           resetTrigger={resetTrigger}
@@ -120,7 +117,8 @@ export default function ViewControlPanel({
           onYearChange={onYearChange}
           onDayChange={onDayChange}
         />
-        <StormSimulators stormMode={stormMode} onChange={setStormMode} />
+        {/* <StormSimulators stormMode={stormMode} onChange={setStormMode} /> */}
+        <FullscreenControl />
       </DesktopContainer>
 
       {!showControls && (
@@ -138,12 +136,6 @@ export default function ViewControlPanel({
       <MobileOverlay $isOpen={showControls}>
         <div style={{ flex: 1 }} onClick={() => setShowControls(false)} />
         <PlayPause autoRotate={autoRotate} onToggle={onToggleRotate} isMobile />
-
-        <StormSimulators
-          stormMode={stormMode}
-          onChange={setStormMode}
-          isMobile
-        />
         <Timeline
           onDataFetched={handleHistoricalData}
           resetTrigger={resetTrigger}
