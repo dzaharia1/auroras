@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Info } from 'lucide-react';
 import SourcesModal from './SourcesModal';
@@ -80,50 +81,6 @@ const SourcesButton = styled.button`
   }
 `;
 
-const StatsContainer = styled.div`
-  pointer-events: auto;
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-`;
-
-const StatGlass = styled.div`
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 1rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  min-width: 120px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-  }
-`;
-
-const StatLabel = styled.span`
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 0.5rem;
-`;
-
-const StatValue = styled.span`
-  font-size: 1.5rem;
-  font-weight: 600;
-`;
-
-const StatUnit = styled.span`
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.5);
-  margin-left: 2px;
-`;
-
 export default function Overlay({ spaceWeather }) {
   const [showSources, setShowSources] = useState(false);
   const { loading } = spaceWeather;
@@ -149,3 +106,9 @@ export default function Overlay({ spaceWeather }) {
     </>
   );
 }
+
+Overlay.propTypes = {
+  spaceWeather: PropTypes.shape({
+    loading: PropTypes.bool,
+  }).isRequired,
+};

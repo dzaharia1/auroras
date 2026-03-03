@@ -1,7 +1,8 @@
-import React, { useRef, useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
+import PropTypes from 'prop-types';
 
 export default function Sun({ position }) {
   const sunRef = useRef();
@@ -84,3 +85,7 @@ export default function Sun({ position }) {
     </group>
   );
 }
+
+Sun.propTypes = {
+  position: PropTypes.arrayOf(PropTypes.number).isRequired,
+};

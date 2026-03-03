@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { Settings2, X } from 'lucide-react';
 import PlayPause from './PlayPause';
 import Timeline from './Timeline';
-import StormSimulators from './StormSimulators';
 import ZoomControl from './ZoomControl';
 import FullscreenControl from './FullscreenControl';
 import Button from '../common/Button';
@@ -43,13 +42,6 @@ const DesktopContainer = styled.div`
   @media (max-width: 1280px) {
     display: none;
   }
-`;
-
-const VerticalGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: flex-start;
 `;
 
 const MobileOverlay = styled.div`

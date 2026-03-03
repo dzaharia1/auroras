@@ -117,7 +117,7 @@ export default function AuroraCurtains({
       const { spaceWeather: sw, earthRadius: er } = propsRef.current;
       populateMesh(node, sw?.ovation?.coordinates, er);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Re-populate when data changes (mesh already exists at this point)
   useEffect(() => {

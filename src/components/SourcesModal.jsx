@@ -1,4 +1,4 @@
-import React from 'react';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { X, ExternalLink } from 'lucide-react';
 
@@ -148,3 +148,7 @@ export default function SourcesModal({ onClose }) {
     </ModalOverlay>
   );
 }
+
+SourcesModal.propTypes = {
+  onClose: PropTypes.func.isRequired,
+};

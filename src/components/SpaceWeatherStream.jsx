@@ -1,6 +1,7 @@
-import React, { useRef, useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import PropTypes from 'prop-types';
 
 export default function SpaceWeatherStream({
   sunPosition,
@@ -105,3 +106,16 @@ export default function SpaceWeatherStream({
     </points>
   );
 }
+
+SpaceWeatherStream.propTypes = {
+  sunPosition: PropTypes.arrayOf(PropTypes.number).isRequired,
+  earthPosition: PropTypes.arrayOf(PropTypes.number).isRequired,
+  spaceWeather: PropTypes.shape({
+    loading: PropTypes.bool,
+    solarWind: PropTypes.shape({
+      speed: PropTypes.number,
+      density: PropTypes.number,
+      bz: PropTypes.number,
+    }),
+  }).isRequired,
+};
