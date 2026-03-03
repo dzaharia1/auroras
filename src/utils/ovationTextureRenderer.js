@@ -56,13 +56,10 @@ export function generateOvationTexture(coordsData, width = 1024, height = 512) {
     for (let i = 0; i < coordsData.length; i++) {
         const [lon, lat, val] = coordsData[i];
         
-        // Map 0 -> 360 Longitude to X (0 to width)
-        // ThreeJS standard sphere maps UVs such that Prime Meridian is in the center, 
-        // spinning counterclockwise. We align X to this UV layout.
-        let x = (lon / 360.0) * width;
-        // Shift by 90 degrees (width / 4) to align the OVATION longitude (0-360 starting at Greenwhich)
-        // with the ThreeJS sphere UV mapping
-        x = (x + width / 4) % width;
+        // Map OVATION 0–360 longitude to texture X (0 to width).
+        // Three.js SphereGeometry UV: u=0.5 is lon 0° (Prime Meridian), u=0/1 is ±180° (Date Line).
+        // Shifting by 180° places lon 0° at the texture center: ((lon + 180) / 360) * width
+        const x = ((lon + 180) / 360) * width % width;
         
         // Map -90 -> 90 Latitude to Y (0 to height) 
         // In ThreeJS, Y=0 is the North Pole (top), Y=height is South Pole (bottom)
