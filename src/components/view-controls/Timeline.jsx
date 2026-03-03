@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Minimize, Maximize } from 'lucide-react';
+import { Maximize, Minimize } from 'lucide-react';
 import PropTypes from 'prop-types';
 
 const Container = styled.div`

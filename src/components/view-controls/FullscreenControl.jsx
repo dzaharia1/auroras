@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Maximize, Minimize } from 'lucide-react';
+import { Fullscreen, Minimize } from 'lucide-react';
 import Button from '../common/Button';
 
 const Container = styled.div`
@@ -56,7 +56,7 @@ export default function FullscreenControl() {
           </>
         ) : (
           <>
-            <Maximize size={18} style={{ marginRight: '8px' }} />
+            <Fullscreen size={18} style={{ marginRight: '8px' }} />
             <span>Fullscreen</span>
           </>
         )}
