@@ -291,7 +291,7 @@ export default function Timeline({
   const [loading, setLoading] = useState(false);
   const [historicalData, setHistoricalData] = useState(null);
   const [majorEvents, setMajorEvents] = useState([]);
-  const [minimized, setMinimized] = useState(false);
+  const [minimized, setMinimized] = useState(true);
 
   const currentDate = getDateFromDayOfYear(year, day);
 
