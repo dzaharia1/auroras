@@ -273,7 +273,7 @@ function formatDateForApi(date) {
 }
 
 const AVAILABLE_YEARS = [
-  1989, 2003, 2005, 2015, 2017, 2022, 2023, 2024, 2025, 2026,
+  1989, 2000, 2003, 2005, 2015, 2017, 2022, 2023, 2024, 2025, 2026,
 ];
 const API_BASE = import.meta.env.VITE_BACKEND_URL;
 
@@ -291,7 +291,7 @@ export default function Timeline({
   const [loading, setLoading] = useState(false);
   const [historicalData, setHistoricalData] = useState(null);
   const [majorEvents, setMajorEvents] = useState([]);
-  const [minimized, setMinimized] = useState(true);
+  const [minimized, setMinimized] = useState(false);
 
   const currentDate = getDateFromDayOfYear(year, day);
 
@@ -457,8 +457,7 @@ export default function Timeline({
   }
 
   const filteredEvents = majorEvents.filter((event) => {
-    const eventDate = new Date(event.date);
-    return eventDate.getFullYear() === year;
+    return event.date.split('-')[0] === year.toString();
   });
 
   return (
