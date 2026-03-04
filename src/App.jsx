@@ -84,7 +84,7 @@ function getDayOfYear(date) {
 function App() {
   const spaceWeather = useSpaceWeather();
   const [stormMode, setStormMode] = useState('live');
-  const [autoRotate, setAutoRotate] = useState(false);
+  const [autoRotate, setAutoRotate] = useState(true);
   const [historicalSpaceWeather, setHistoricalSpaceWeather] = useState(null);
   const [zoomRadius, setZoomRadius] = useState(CAMERA_ZOOM_RADIUS);
   const [year, setYear] = useState(new Date().getFullYear());
