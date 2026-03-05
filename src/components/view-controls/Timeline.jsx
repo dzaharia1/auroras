@@ -150,10 +150,10 @@ const EventButton = styled.button`
     height: 6px;
     border-radius: 50%;
     background: ${(props) => {
-      if (props.$gValue >= 5) return '#ff4d4d';
-      if (props.$gValue >= 4) return '#ffb84d';
-      return '#8cdcd2';
-    }};
+    if (props.$gValue >= 5) return '#ff4d4d';
+    if (props.$gValue >= 4) return '#ffb84d';
+    return '#8cdcd2';
+  }};
   }
 `;
 
@@ -484,7 +484,7 @@ export default function Timeline({
             <LiveButton
               $active={stormMode === 'live'}
               onClick={handleLiveClick}>
-              Live
+              Forecast +0 ~ 10 minutes
             </LiveButton>
           </YearButtonsGroup>
         )}

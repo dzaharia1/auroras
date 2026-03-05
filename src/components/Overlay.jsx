@@ -98,7 +98,7 @@ export default function Overlay({ spaceWeather }) {
               Sources
             </SourcesButton>
           </TitleBox>
-          <Subtitle>Real-time and historical space weather dynamics</Subtitle>
+          <Subtitle>Forecasted and historical space weather dynamics</Subtitle>
         </Header>
       </Container>
 
