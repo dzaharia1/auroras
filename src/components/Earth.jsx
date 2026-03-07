@@ -24,12 +24,10 @@ const MONTHS = [
 export default function Earth({
   position,
   spaceWeather,
-  autoRotate,
   stormMode,
   currentDate,
 }) {
   const groupRef = useRef();
-  const earthRef = useRef();
   const auroraRef = useRef();
   const auroraOffsetRef = useRef();
   const { gl } = useThree();
@@ -40,7 +38,9 @@ export default function Earth({
   // Use refs for drag state to avoid re-renders during mouse move
   const isDragging = useRef(false);
   const previousX = useRef(0);
-  const rotationVelocity = useRef(0);
+  const previousY = useRef(0);
+  const velocityX = useRef(0);
+  const velocityY = useRef(0);
 
   const earthMaterial = useMemo(() => {
     const monthIndex = (currentDate || new Date()).getMonth();
@@ -94,15 +94,15 @@ export default function Earth({
     const el = gl.domElement;
 
     const handleDown = (e) => {
-      // Don't start drag if clicking on UI elements (buttons or overlay content)
       if (e.target.closest('button') || e.target.closest('.overlay-content'))
         return;
 
       isDragging.current = true;
       previousX.current = e.clientX;
-      rotationVelocity.current = 0;
+      previousY.current = e.clientY;
+      velocityX.current = 0;
+      velocityY.current = 0;
 
-      // Capture the pointer to ensure events continue even if mouse leaves window
       el.setPointerCapture(e.pointerId);
       document.body.style.cursor = 'grabbing';
     };
@@ -117,14 +117,21 @@ export default function Earth({
       if (!isDragging.current) return;
 
       const deltaX = e.clientX - previousX.current;
+      const deltaY = e.clientY - previousY.current;
       previousX.current = e.clientX;
+      previousY.current = e.clientY;
 
-      // Use a consistent screen-space rotation factor
-      const factor = (deltaX / window.innerWidth) * 3.14159 * 2.5;
+      const fx = (deltaX / window.innerWidth) * Math.PI * 2.5;
+      const fy = (deltaY / window.innerHeight) * Math.PI * 2.5;
 
-      if (earthRef.current) earthRef.current.rotation.y += factor;
-      if (auroraRef.current) auroraRef.current.rotation.y += factor;
-      rotationVelocity.current = factor;
+      if (groupRef.current) {
+        const qY = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), fx);
+        const qX = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), fy);
+        groupRef.current.quaternion.premultiply(qY).premultiply(qX);
+      }
+
+      velocityX.current = fx;
+      velocityY.current = fy;
     };
 
     el.addEventListener('pointerdown', handleDown);
@@ -149,17 +156,16 @@ export default function Earth({
       );
     }
 
-    if (earthRef.current && !isDragging.current) {
-      const step = rotationVelocity.current;
-      earthRef.current.rotation.y += step;
+    if (groupRef.current && !isDragging.current) {
+      const vx = velocityX.current;
+      const vy = velocityY.current;
 
-      // Update basic aurora rotation (matching Earth spin)
-      if (auroraRef.current) auroraRef.current.rotation.y += step;
-
-      rotationVelocity.current *= 0.95;
-      if (Math.abs(rotationVelocity.current) < 0.001 && autoRotate) {
-        earthRef.current.rotation.y += 0.0005;
-        if (auroraRef.current) auroraRef.current.rotation.y += 0.0005;
+      if (Math.abs(vx) > 0.0001 || Math.abs(vy) > 0.0001) {
+        const qY = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), vx);
+        const qX = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), vy);
+        groupRef.current.quaternion.premultiply(qY).premultiply(qX);
+        velocityX.current *= 0.95;
+        velocityY.current *= 0.95;
       }
     }
 
@@ -220,7 +226,7 @@ export default function Earth({
   return (
     <group position={position} ref={groupRef}>
       {/* Earth Mesh */}
-      <mesh ref={earthRef}>
+      <mesh>
         <sphereGeometry args={[18, 64, 64]} />
         <primitive object={earthMaterial} attach="material" />
       </mesh>
@@ -244,5 +250,4 @@ Earth.propTypes = {
       coordinates: PropTypes.array,
     }),
   }),
-  autoRotate: PropTypes.bool,
 };

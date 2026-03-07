@@ -2,11 +2,54 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Settings2, X } from 'lucide-react';
-import PlayPause from './PlayPause';
 import Timeline from './Timeline';
 import ZoomControl from './ZoomControl';
 import FullscreenControl from './FullscreenControl';
+import ViewSwitcher from './ViewSwitcher';
+import LayerPanel from './LayerPanel';
+import StormTimeline from './StormTimeline';
 import Button from '../common/Button';
+
+const DesktopContainer = styled.div`
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+  right: 2rem;
+  z-index: 20;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 36px;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  opacity: ${(p) => (p.$isIdle ? 0.15 : 1)};
+
+  & > * {
+    pointer-events: ${(p) => (p.$isIdle ? 'none' : 'auto')};
+  }
+
+  @media (max-width: 1280px) {
+    display: none;
+  }
+`;
+
+const TopRightControls = styled.div`
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  z-index: 20;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  opacity: ${(p) => (p.$isIdle ? 0.15 : 1)};
+
+  & > * {
+    pointer-events: ${(p) => (p.$isIdle ? 'none' : 'auto')};
+  }
+`;
 
 const MobileBottomRow = styled.div`
   display: none;
@@ -20,27 +63,9 @@ const MobileBottomRow = styled.div`
     right: calc(1.5rem + env(safe-area-inset-right));
     gap: 0.75rem;
     z-index: 20;
-  }
-`;
-
-const DesktopContainer = styled.div`
-  position: absolute;
-  bottom: 2rem;
-  left: 2rem;
-  right: 2rem;
-  z-index: 20;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  gap: 36px;
-  pointer-events: none;
-
-  & > * {
-    pointer-events: auto;
-  }
-
-  @media (max-width: 1280px) {
-    display: none;
+    transition: opacity 0.3s ease;
+    opacity: ${(p) => (p.$isIdle ? 0.15 : 1)};
+    pointer-events: ${(p) => (p.$isIdle ? 'none' : 'auto')};
   }
 `;
 
@@ -80,8 +105,9 @@ const MobileOverlay = styled.div`
 `;
 
 export default function ViewControlPanel({
-  autoRotate,
-  onToggleRotate,
+  activeView,
+  onViewChange,
+  isIdle,
   stormMode,
   setStormMode,
   handleHistoricalData,
@@ -92,29 +118,42 @@ export default function ViewControlPanel({
   day,
   onYearChange,
   onDayChange,
+  stormTimeline,
 }) {
   const [showControls, setShowControls] = useState(false);
 
   return (
     <>
-      <DesktopContainer>
-        <PlayPause autoRotate={autoRotate} onToggle={onToggleRotate} />
-        <Timeline
-          onDataFetched={handleHistoricalData}
-          resetTrigger={resetTrigger}
-          stormMode={stormMode}
-          setStormMode={setStormMode}
-          year={year}
-          day={day}
-          onYearChange={onYearChange}
-          onDayChange={onDayChange}
-        />
-        {/* <StormSimulators stormMode={stormMode} onChange={setStormMode} /> */}
-        <FullscreenControl />
-      </DesktopContainer>
+      {/* Top-right: View switcher + Layer panel */}
+      <TopRightControls $isIdle={isIdle}>
+        <ViewSwitcher activeView={activeView} onViewChange={onViewChange} />
+        <LayerPanel activeView={activeView} />
+      </TopRightControls>
 
-      {!showControls && (
-        <MobileBottomRow>
+      {/* Bottom: Timeline — earth view only */}
+      {activeView === 'earth' && (
+        <DesktopContainer $isIdle={isIdle}>
+          <Timeline
+            onDataFetched={handleHistoricalData}
+            resetTrigger={resetTrigger}
+            stormMode={stormMode}
+            setStormMode={setStormMode}
+            year={year}
+            day={day}
+            onYearChange={onYearChange}
+            onDayChange={onDayChange}
+          />
+          <StormTimeline
+            timeline={stormTimeline.timeline}
+            loading={stormTimeline.loading}
+            isIdle={isIdle}
+          />
+          <FullscreenControl />
+        </DesktopContainer>
+      )}
+
+      {!showControls && activeView === 'earth' && (
+        <MobileBottomRow $isIdle={isIdle}>
           <ZoomControl zoomRadius={zoomRadius} onZoomChange={onZoomChange} />
           <Button
             onClick={() => setShowControls(true)}
@@ -125,9 +164,9 @@ export default function ViewControlPanel({
         </MobileBottomRow>
       )}
 
-      <MobileOverlay $isOpen={showControls}>
+      <MobileOverlay $isOpen={showControls && activeView === 'earth'}>
         <div style={{ flex: 1 }} onClick={() => setShowControls(false)} />
-        <PlayPause autoRotate={autoRotate} onToggle={onToggleRotate} isMobile />
+        <ViewSwitcher activeView={activeView} onViewChange={onViewChange} />
         <Timeline
           onDataFetched={handleHistoricalData}
           resetTrigger={resetTrigger}
@@ -152,8 +191,9 @@ export default function ViewControlPanel({
 }
 
 ViewControlPanel.propTypes = {
-  autoRotate: PropTypes.bool.isRequired,
-  onToggleRotate: PropTypes.func.isRequired,
+  activeView: PropTypes.string.isRequired,
+  onViewChange: PropTypes.func.isRequired,
+  isIdle: PropTypes.bool.isRequired,
   stormMode: PropTypes.string.isRequired,
   setStormMode: PropTypes.func.isRequired,
   handleHistoricalData: PropTypes.func.isRequired,
@@ -164,4 +204,9 @@ ViewControlPanel.propTypes = {
   day: PropTypes.number.isRequired,
   onYearChange: PropTypes.func.isRequired,
   onDayChange: PropTypes.func.isRequired,
+  stormTimeline: PropTypes.shape({
+    timeline: PropTypes.object,
+    loading: PropTypes.bool,
+    error: PropTypes.string,
+  }).isRequired,
 };

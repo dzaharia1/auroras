@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
-import { Maximize, Minimize } from 'lucide-react';
+import { Maximize, Minimize, Play, Pause } from 'lucide-react';
 import PropTypes from 'prop-types';
 
 const Container = styled.div`
@@ -292,6 +292,8 @@ export default function Timeline({
   const [historicalData, setHistoricalData] = useState(null);
   const [majorEvents, setMajorEvents] = useState([]);
   const [minimized, setMinimized] = useState(false);
+  const [playbackRunning, setPlaybackRunning] = useState(false);
+  const fetchRef = useRef(null);
 
   const currentDate = getDateFromDayOfYear(year, day);
 
@@ -330,7 +332,7 @@ export default function Timeline({
     fetchMajorEvents();
   }, []);
 
-  const fetchHistoricalData = async (targetDate) => {
+  const fetchHistoricalData = useCallback(async (targetDate) => {
     setLoading(true);
     const dateStr = formatDateForApi(targetDate);
 
@@ -349,7 +351,31 @@ export default function Timeline({
     } finally {
       setLoading(false);
     }
-  };
+  }, [onDataFetched]);
+
+  // Keep fetchRef current so the interval closure always has the latest version
+  fetchRef.current = fetchHistoricalData;
+
+  // Auto-advance playback: increment day every 1s when playing in historical mode
+  useEffect(() => {
+    if (!playbackRunning || stormMode !== 'historical') return;
+
+    const id = setInterval(() => {
+      onDayChange((prevDay) => {
+        const nextDay = prevDay + 1;
+        if (nextDay > maxDays) {
+          setPlaybackRunning(false);
+          setStormMode('live');
+          return prevDay;
+        }
+        const nextDate = getDateFromDayOfYear(year, nextDay);
+        fetchRef.current(nextDate);
+        return nextDay;
+      });
+    }, 1000);
+
+    return () => clearInterval(id);
+  }, [playbackRunning, stormMode, maxDays, year, onDayChange, setStormMode]);
 
   const handleYearClick = (targetYear) => {
     const today = new Date();
@@ -373,6 +399,7 @@ export default function Timeline({
   };
 
   const handleLiveClick = () => {
+    setPlaybackRunning(false);
     setStormMode('live');
   };
 
@@ -388,6 +415,7 @@ export default function Timeline({
   };
 
   const handleStep = (direction) => {
+    setPlaybackRunning(false);
     let nextDay = day + direction;
     let nextYear = year;
 
@@ -419,6 +447,7 @@ export default function Timeline({
   };
 
   const handleSliderChange = (e) => {
+    setPlaybackRunning(false);
     onDayChange(parseInt(e.target.value, 10));
   };
 
@@ -498,6 +527,13 @@ export default function Timeline({
       {!minimized && (
         <>
           <ScrubberRow>
+            {stormMode === 'historical' && (
+              <IconButton
+                onClick={() => setPlaybackRunning((r) => !r)}
+                title={playbackRunning ? 'Pause playback' : 'Play playback'}>
+                {playbackRunning ? <Pause size={14} /> : <Play size={14} />}
+              </IconButton>
+            )}
             <IconButton
               onClick={() => handleStep(-1)}
               disabled={day <= 1 && AVAILABLE_YEARS.indexOf(year) === 0}

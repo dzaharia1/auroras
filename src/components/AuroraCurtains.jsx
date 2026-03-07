@@ -4,7 +4,7 @@ import { useFrame } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 import { lonLatToWorld, ovationLonToGeo } from '../utils/globe';
 
-const MAX_INSTANCES = 9000;
+const MAX_INSTANCES = 18000;
 const EARTH_RADIUS = 18;
 
 // Simplex noise GLSL
@@ -41,12 +41,12 @@ function populateMesh(mesh, coords, earthRadius) {
     return;
   }
 
-  // Filter: northern aurora oval zone, meaningful probability
-  const filtered = coords.filter(([, lat, val]) => lat >= 45 && val >= 5);
+  // Filter: meaningful probability only (both hemispheres)
+  const filtered = coords.filter(([, lat, val]) => Math.abs(lat) >= 45 && val >= 5);
   console.log(
     '[Aurora] coords:',
     coords.length,
-    '| north+filtered:',
+    '| filtered:',
     filtered.length,
   );
 
