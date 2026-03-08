@@ -130,7 +130,7 @@ const sources = [
   {
     name: 'Google Antigravity',
     description: 'AI coding assistance.',
-    link: 'https://antigravity.dev/',
+    link: 'https://antigravity.google/',
   },
 ];
 
