@@ -95,6 +95,10 @@ const SourcesButton = styled.button`
     color: white;
     border-color: rgba(255, 255, 255, 0.3);
   }
+
+  @media (max-width: 1280px) {
+    display: none;
+  }
 `;
 
 const SunControlsWrapper = styled.div`
@@ -220,6 +224,84 @@ const ModeBadge = styled.div`
         vertical-align: middle;
       }
     `}
+
+  @media (max-width: 1280px) {
+    display: none;
+  }
+`;
+
+// Shared badge visual without absolute positioning — used inside the mobile stack
+const LiveBadge = styled.div`
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  pointer-events: none;
+  background: ${(p) =>
+    p.$live ? 'rgba(100, 220, 180, 0.15)' : 'rgba(255, 180, 60, 0.15)'};
+  border: 1px solid
+    ${(p) => (p.$live ? 'rgba(100, 220, 180, 0.4)' : 'rgba(255, 180, 60, 0.4)')};
+  color: ${(p) =>
+    p.$live ? 'rgba(140, 255, 210, 1)' : 'rgba(255, 210, 100, 1)'};
+
+  ${(p) =>
+    p.$live &&
+    css`
+      &::before {
+        content: '';
+        display: inline-block;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: rgba(140, 255, 210, 1);
+        margin-right: 0.4rem;
+        animation: ${pulse} 2s infinite;
+        vertical-align: middle;
+      }
+    `}
+`;
+
+// Mobile-only stack: live badge (earth) + sources button, positioned 8px above controls button
+const MobileBottomRightStack = styled.div`
+  display: none;
+  @media (max-width: 1280px) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    position: absolute;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom) + 48px + 8px);
+    right: calc(1.5rem + env(safe-area-inset-right));
+    z-index: 20;
+    pointer-events: none;
+    & > button {
+      pointer-events: auto;
+    }
+  }
+`;
+
+const MobileSourcesButton = styled.button`
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
 `;
 
 export default function Overlay({
@@ -316,6 +398,22 @@ export default function Overlay({
           Close
         </Button>
       </MobileDataOverlay>
+
+      {/* Mobile: live badge (earth only) + sources, stacked 8px above controls button */}
+      <MobileBottomRightStack>
+        {activeView === 'earth' && (
+          <LiveBadge $live={isLive}>
+            {isLive && 'Live'}
+            {isHistorical && 'Historical'}
+            {stormMode === 'storm' && 'G4–G5 Simulation'}
+            {stormMode === 'substorm' && 'G1–G3 Simulation'}
+          </LiveBadge>
+        )}
+        <MobileSourcesButton onClick={() => setShowSources(true)}>
+          <Info size={14} />
+          Sources
+        </MobileSourcesButton>
+      </MobileBottomRightStack>
 
       {showSources && <SourcesModal onClose={() => setShowSources(false)} />}
     </>
