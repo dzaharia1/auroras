@@ -96,9 +96,16 @@ export default function SunImageView({ isIdle, sunWavelength, setSunWavelength }
   const latestWavelengthRef = useRef(sunWavelength);
   const refreshTimerRef = useRef(null);
 
-  // Data hooks for overlay — pass the image observation date so data matches the image
-  const { regions } = useSunRegions(imageObservedDate);
-  const { events } = useSunEvents();
+  // Shift marker data 12 hours earlier than the image to compensate for alignment offset
+  const markerDate = imageObservedDate
+    ? new Date(new Date(imageObservedDate).getTime() - 12 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10)
+    : null;
+
+  // Data hooks for overlay — pass the shifted date so markers align with the image
+  const { regions } = useSunRegions(markerDate);
+  const { events } = useSunEvents(markerDate);
 
   // Fetch the X-Image-Date header from the backend to learn when the image was taken
   useEffect(() => {
