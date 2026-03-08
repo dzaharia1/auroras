@@ -7,15 +7,8 @@ const alertPulse = keyframes`
 `;
 
 const Container = styled.div`
-  position: absolute;
-  top: 8rem;
-  left: 2rem;
-  z-index: 15;
   font-family: 'Inter', sans-serif;
   color: white;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  opacity: ${(p) => (p.$isIdle ? 0.2 : 1)};
 `;
 
 const Label = styled.div`
@@ -72,12 +65,12 @@ function flareColor(cls) {
   return 'rgba(255,255,255,0.6)';
 }
 
-export default function SolarFlareLayer({ xray, isIdle }) {
+export default function SolarFlareLayer({ xray }) {
   const cls = xray?.peak24h?.fluxClass ?? xray?.current?.fluxClass ?? null;
   const isAlert = xray?.activeAlert ?? false;
 
   return (
-    <Container $isIdle={isIdle}>
+    <Container>
       <Label>X-Ray Flux (24h peak)</Label>
       <Badge $cls={cls} $alert={isAlert}>
         {cls ?? '—'} class
@@ -95,5 +88,4 @@ SolarFlareLayer.propTypes = {
     peak24h: PropTypes.shape({ fluxClass: PropTypes.string }),
     activeAlert: PropTypes.bool,
   }),
-  isIdle: PropTypes.bool,
 };

@@ -2,15 +2,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 const Container = styled.div`
-  position: absolute;
-  top: ${(p) => (p.$hasBz ? '12rem' : '8rem')};
-  left: 2rem;
-  z-index: 15;
   font-family: 'Inter', sans-serif;
   color: white;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  opacity: ${(p) => (p.$isIdle ? 0.2 : 1)};
 `;
 
 const Label = styled.div`
@@ -44,14 +37,14 @@ const Unit = styled.span`
   color: rgba(255, 255, 255, 0.4);
 `;
 
-export default function SolarWindLayer({ solarWind, isIdle, hasBz }) {
+export default function SolarWindLayer({ solarWind }) {
   const speed = solarWind?.speed ?? null;
   const density = solarWind?.density ?? null;
 
   if (speed === null) return null;
 
   return (
-    <Container $isIdle={isIdle} $hasBz={hasBz}>
+    <Container>
       <Label>Solar Wind</Label>
       <Row>
         <BigValue $speed={speed}>{Math.round(speed)}</BigValue>
@@ -72,6 +65,4 @@ SolarWindLayer.propTypes = {
     speed: PropTypes.number,
     density: PropTypes.number,
   }),
-  isIdle: PropTypes.bool,
-  hasBz: PropTypes.bool,
 };
