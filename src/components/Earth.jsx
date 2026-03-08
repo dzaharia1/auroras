@@ -37,6 +37,8 @@ export default function Earth({
 
   // Use refs for drag state to avoid re-renders during mouse move
   const isDragging = useRef(false);
+  const dragPointerIdRef = useRef(null);
+  const activePointerCountRef = useRef(0);
   const previousX = useRef(0);
   const previousY = useRef(0);
   const velocityX = useRef(0);
@@ -97,7 +99,22 @@ export default function Earth({
       if (e.target.closest('button') || e.target.closest('.overlay-content'))
         return;
 
+      activePointerCountRef.current += 1;
+
+      // Second finger = pinch gesture; cancel drag rotation to prevent wild spinning
+      if (activePointerCountRef.current > 1) {
+        isDragging.current = false;
+        if (dragPointerIdRef.current !== null) {
+          try { el.releasePointerCapture(dragPointerIdRef.current); } catch (_) {}
+          dragPointerIdRef.current = null;
+        }
+        velocityX.current = 0;
+        velocityY.current = 0;
+        return;
+      }
+
       isDragging.current = true;
+      dragPointerIdRef.current = e.pointerId;
       previousX.current = e.clientX;
       previousY.current = e.clientY;
       velocityX.current = 0;
@@ -108,13 +125,17 @@ export default function Earth({
     };
 
     const handleUp = (e) => {
-      isDragging.current = false;
-      el.releasePointerCapture(e.pointerId);
-      document.body.style.cursor = 'default';
+      activePointerCountRef.current = Math.max(0, activePointerCountRef.current - 1);
+      if (e.pointerId === dragPointerIdRef.current) {
+        isDragging.current = false;
+        dragPointerIdRef.current = null;
+        try { el.releasePointerCapture(e.pointerId); } catch (_) {}
+        document.body.style.cursor = 'default';
+      }
     };
 
     const handleMove = (e) => {
-      if (!isDragging.current) return;
+      if (!isDragging.current || e.pointerId !== dragPointerIdRef.current) return;
 
       const deltaX = e.clientX - previousX.current;
       const deltaY = e.clientY - previousY.current;
@@ -137,7 +158,10 @@ export default function Earth({
     el.addEventListener('pointerdown', handleDown);
     el.addEventListener('pointermove', handleMove);
     el.addEventListener('pointerup', handleUp);
-    el.addEventListener('pointercancel', handleUp);
+    el.addEventListener('pointercancel', (e) => {
+      activePointerCountRef.current = Math.max(0, activePointerCountRef.current - 1);
+      handleUp(e);
+    });
 
     return () => {
       el.removeEventListener('pointerdown', handleDown);

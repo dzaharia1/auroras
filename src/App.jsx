@@ -32,7 +32,7 @@ function EarthCamera({ zoomRadius, onZoomChange }) {
   useEffect(() => {
     const handleWheel = (e) => {
       e.preventDefault();
-      onZoomChange(Math.max(20, Math.min(50, zoomRadiusRef.current + e.deltaY * 0.05)));
+      onZoomChange(Math.max(10, Math.min(50, zoomRadiusRef.current + e.deltaY * 0.05)));
     };
 
     const handleTouchStart = (e) => {
@@ -55,7 +55,7 @@ function EarthCamera({ zoomRadius, onZoomChange }) {
           e.touches[1].clientY - e.touches[0].clientY,
         );
         const scale = pinchStartRef.current.dist / dist;
-        onZoomChange(Math.max(20, Math.min(50, pinchStartRef.current.radius * scale)));
+        onZoomChange(Math.max(10, Math.min(50, pinchStartRef.current.radius * scale)));
       }
     };
 
