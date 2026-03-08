@@ -271,36 +271,39 @@ const MobileBottomRightStack = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 8px;
     position: absolute;
     bottom: calc(1.5rem + env(safe-area-inset-bottom) + 48px + 8px);
     right: calc(1.5rem + env(safe-area-inset-right));
     z-index: 20;
     pointer-events: none;
-    & > button {
-      pointer-events: auto;
-    }
   }
 `;
 
-const MobileSourcesButton = styled.button`
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  color: rgba(255, 255, 255, 0.6);
-  padding: 0.4rem 0.8rem;
-  font-size: 0.7rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
+const MobileSourcesAboveData = styled.button`
+  display: none;
+  @media (max-width: 1280px) {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    position: absolute;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom) + 48px + 8px);
+    left: calc(1.5rem + env(safe-area-inset-left));
+    z-index: 20;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    border-color: rgba(255, 255, 255, 0.3);
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
   }
 `;
 
@@ -399,21 +402,23 @@ export default function Overlay({
         </Button>
       </MobileDataOverlay>
 
-      {/* Mobile: live badge (earth only) + sources, stacked 8px above controls button */}
-      <MobileBottomRightStack>
-        {activeView === 'earth' && (
+      {/* Mobile: mode indicator 8px above controls button (bottom-right, earth only) */}
+      {activeView === 'earth' && (
+        <MobileBottomRightStack>
           <LiveBadge $live={isLive}>
             {isLive && 'Live'}
             {isHistorical && 'Historical'}
             {stormMode === 'storm' && 'G4–G5 Simulation'}
             {stormMode === 'substorm' && 'G1–G3 Simulation'}
           </LiveBadge>
-        )}
-        <MobileSourcesButton onClick={() => setShowSources(true)}>
-          <Info size={14} />
-          Sources
-        </MobileSourcesButton>
-      </MobileBottomRightStack>
+        </MobileBottomRightStack>
+      )}
+
+      {/* Mobile: sources button 8px above data button (bottom-left, both views) */}
+      <MobileSourcesAboveData onClick={() => setShowSources(true)}>
+        <Info size={14} />
+        Sources
+      </MobileSourcesAboveData>
 
       {showSources && <SourcesModal onClose={() => setShowSources(false)} />}
     </>
