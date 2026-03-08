@@ -4,7 +4,6 @@ import styled, { keyframes, css } from 'styled-components';
 import { Info } from 'lucide-react';
 import SourcesModal from './SourcesModal';
 import { EarthHUDLayers } from './EarthScene';
-import { useLayerContext } from '../context/LayerContext';
 import SolarFlareLayer from './layers/SolarFlareLayer';
 import SolarCycleLayer from './layers/SolarCycleLayer';
 import SolarWindOriginLayer from './layers/SolarWindOriginLayer';
@@ -170,7 +169,6 @@ export default function Overlay({
   activeView,
 }) {
   const [showSources, setShowSources] = useState(false);
-  const { layers } = useLayerContext();
   const { loading } = spaceWeather;
 
   const isLive = stormMode === 'live';
@@ -207,7 +205,6 @@ export default function Overlay({
       {activeView === 'earth' && (
         <EarthHUDLayers
           spaceWeather={spaceWeather}
-          layers={layers}
           isIdle={isIdle}
         />
       )}
@@ -216,13 +213,9 @@ export default function Overlay({
       {activeView === 'sun' && (
         <SunControlsWrapper $isIdle={isIdle}>
           <SunMetricsPanel>
-            {layers.solarFlares && (
-              <SolarFlareLayer xray={spaceWeather?.xray} />
-            )}
-            {layers.solarCycle && <SolarCycleLayer />}
-            {layers.solarWindOrigin && (
-              <SolarWindOriginLayer solarWind={spaceWeather?.solarWind} />
-            )}
+            <SolarFlareLayer xray={spaceWeather?.xray} />
+            <SolarCycleLayer />
+            <SolarWindOriginLayer solarWind={spaceWeather?.solarWind} />
           </SunMetricsPanel>
         </SunControlsWrapper>
       )}

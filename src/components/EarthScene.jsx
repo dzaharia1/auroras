@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Earth from './Earth';
-import { useLayerContext } from '../context/LayerContext';
 import KpLayer from './layers/KpLayer';
 import BzIndicator from './layers/BzIndicator';
 import SolarWindLayer from './layers/SolarWindLayer';
@@ -33,33 +32,23 @@ const RightMetrics = styled(MetricsGroup)`
 // these are absolutely-positioned HTML overlays imported here for logical grouping
 // and conditionally rendered by App.jsx passing them to Overlay.
 
-export function EarthHUDLayers({ spaceWeather, layers, isIdle }) {
-  const hasLeft = layers.bz || layers.solarWind || layers.dst;
-  const hasRight = layers.hemisphericPower;
-
+export function EarthHUDLayers({ spaceWeather, isIdle }) {
   return (
     <>
-      {hasLeft && (
-        <LeftMetrics $isIdle={isIdle}>
-          {layers.bz && <BzIndicator solarWind={spaceWeather?.solarWind} />}
-          {layers.solarWind && <SolarWindLayer solarWind={spaceWeather?.solarWind} />}
-          {layers.dst && <DstLayer dst={spaceWeather?.dst} />}
-        </LeftMetrics>
-      )}
-      {hasRight && (
-        <RightMetrics $isIdle={isIdle}>
-          {layers.hemisphericPower && (
-            <HemisphericPowerLayer hemisphericPower={spaceWeather?.hemisphericPower} />
-          )}
-        </RightMetrics>
-      )}
+      <LeftMetrics $isIdle={isIdle}>
+        <BzIndicator solarWind={spaceWeather?.solarWind} />
+        <SolarWindLayer solarWind={spaceWeather?.solarWind} />
+        <DstLayer dst={spaceWeather?.dst} />
+      </LeftMetrics>
+      <RightMetrics $isIdle={isIdle}>
+        <HemisphericPowerLayer hemisphericPower={spaceWeather?.hemisphericPower} />
+      </RightMetrics>
     </>
   );
 }
 
 EarthHUDLayers.propTypes = {
   spaceWeather: PropTypes.object,
-  layers: PropTypes.object.isRequired,
   isIdle: PropTypes.bool,
 };
 
@@ -70,8 +59,6 @@ export default function EarthScene({
   stormMode,
   currentDate,
 }) {
-  const { layers } = useLayerContext();
-
   return (
     <>
       <Earth
@@ -80,7 +67,7 @@ export default function EarthScene({
         stormMode={stormMode}
         currentDate={currentDate}
       />
-      {layers.kp && spaceWeather?.kp && (
+      {spaceWeather?.kp && (
         <KpLayer kp={spaceWeather.kp} position={position} />
       )}
     </>

@@ -6,11 +6,9 @@ import Timeline from './Timeline';
 import ZoomControl from './ZoomControl';
 import FullscreenControl from './FullscreenControl';
 import ViewSwitcher from './ViewSwitcher';
-import LayerPanel from './LayerPanel';
 import StormTimeline from './StormTimeline';
 import Button from '../common/Button';
 import WavelengthSelector from '../WavelengthSelector';
-import { useLayerContext } from '../../context/LayerContext';
 
 const DesktopContainer = styled.div`
   position: absolute;
@@ -121,17 +119,17 @@ export default function ViewControlPanel({
   onYearChange,
   onDayChange,
   stormTimeline,
+  sunWavelength,
+  setSunWavelength,
 }) {
   const [showControls, setShowControls] = useState(false);
   const [showSunControls, setShowSunControls] = useState(false);
-  const { sunWavelength, setSunWavelength } = useLayerContext();
 
   return (
     <>
-      {/* Top-right: View switcher + Layer panel */}
+      {/* Top-right: View switcher */}
       <TopRightControls $isIdle={isIdle}>
         <ViewSwitcher activeView={activeView} onViewChange={onViewChange} />
-        <LayerPanel activeView={activeView} />
       </TopRightControls>
 
       {/* Bottom: Timeline — earth view only */}
@@ -241,4 +239,6 @@ ViewControlPanel.propTypes = {
     loading: PropTypes.bool,
     error: PropTypes.string,
   }).isRequired,
+  sunWavelength: PropTypes.string.isRequired,
+  setSunWavelength: PropTypes.func.isRequired,
 };

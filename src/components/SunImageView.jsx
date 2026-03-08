@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { useLayerContext } from '../context/LayerContext';
 import WavelengthSelector from './WavelengthSelector';
 import SunImageOverlay from './SunImageOverlay';
 import { useSunRegions } from '../hooks/useSunRegions';
@@ -68,8 +67,7 @@ function buildImageUrl(wavelength, cacheBust) {
   return `${API_BASE}/sun/image?wavelength=${wavelength}&width=1024&height=1024${cacheBust ? `&_t=${cacheBust}` : ''}`;
 }
 
-export default function SunImageView({ isIdle }) {
-  const { sunWavelength, setSunWavelength, layers } = useLayerContext();
+export default function SunImageView({ isIdle, sunWavelength, setSunWavelength }) {
 
   const [currentUrl, setCurrentUrl] = useState(() =>
     buildImageUrl(sunWavelength, null),
@@ -251,8 +249,8 @@ export default function SunImageView({ isIdle }) {
               regions={regions}
               events={events}
               imageParams={SUN_IMAGE_PARAMS}
-              showRegions={!!layers.activeRegionOutlines}
-              showProminences={!!layers.prominenceOutlines}
+              showRegions={true}
+              showProminences={true}
               containerWidth={imageDims.width}
               containerHeight={imageDims.height}
             />
@@ -275,4 +273,6 @@ export default function SunImageView({ isIdle }) {
 
 SunImageView.propTypes = {
   isIdle: PropTypes.bool,
+  sunWavelength: PropTypes.string.isRequired,
+  setSunWavelength: PropTypes.func.isRequired,
 };
