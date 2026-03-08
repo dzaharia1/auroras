@@ -174,32 +174,34 @@ export default function SunImageOverlay({
         pointerEvents: 'none',
         overflow: 'visible',
       }}>
-      {showRegions && regions.length === 0 && (
-        <text
-          x={containerWidth / 2}
-          y={containerHeight - 40}
-          textAnchor="middle"
-          fill="rgba(255, 200, 60, 0.5)"
-          fontSize={11}
-          fontFamily="monospace">
-          No active regions currently reported
-        </text>
-      )}
+      <g transform="translate(0, -16)">
+        {showRegions && regions.length === 0 && (
+          <text
+            x={containerWidth / 2}
+            y={containerHeight - 40}
+            textAnchor="middle"
+            fill="rgba(255, 200, 60, 0.5)"
+            fontSize={11}
+            fontFamily="monospace">
+            No active regions currently reported
+          </text>
+        )}
 
-      {showRegions &&
-        regions.map((r) => (
-          <ActiveRegionMarker
-            key={r.region}
-            region={r}
-            scaleX={scaleX}
-            scaleY={scaleY}
-          />
-        ))}
+        {showRegions &&
+          regions.map((r) => (
+            <ActiveRegionMarker
+              key={r.region}
+              region={r}
+              scaleX={scaleX}
+              scaleY={scaleY}
+            />
+          ))}
 
-      {showProminences &&
-        events.map((e, i) => (
-          <ProminenceMarker key={i} event={e} scaleX={scaleX} scaleY={scaleY} />
-        ))}
+        {showProminences &&
+          events.map((e, i) => (
+            <ProminenceMarker key={i} event={e} scaleX={scaleX} scaleY={scaleY} />
+          ))}
+      </g>
     </svg>
   );
 }
