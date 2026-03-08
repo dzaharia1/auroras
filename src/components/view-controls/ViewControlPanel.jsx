@@ -9,6 +9,8 @@ import ViewSwitcher from './ViewSwitcher';
 import LayerPanel from './LayerPanel';
 import StormTimeline from './StormTimeline';
 import Button from '../common/Button';
+import WavelengthSelector from '../WavelengthSelector';
+import { useLayerContext } from '../../context/LayerContext';
 
 const DesktopContainer = styled.div`
   position: absolute;
@@ -121,6 +123,8 @@ export default function ViewControlPanel({
   stormTimeline,
 }) {
   const [showControls, setShowControls] = useState(false);
+  const [showSunControls, setShowSunControls] = useState(false);
+  const { sunWavelength, setSunWavelength } = useLayerContext();
 
   return (
     <>
@@ -181,6 +185,34 @@ export default function ViewControlPanel({
         <Button
           fullWidth
           onClick={() => setShowControls(false)}
+          style={{ marginTop: '1rem' }}>
+          <X size={20} style={{ marginRight: '8px' }} />
+          Close Controls
+        </Button>
+      </MobileOverlay>
+
+      {!showSunControls && activeView === 'sun' && (
+        <MobileBottomRow $isIdle={isIdle}>
+          <Button
+            onClick={() => setShowSunControls(true)}
+            style={{ height: '48px' }}>
+            <Settings2 size={18} />
+            Controls
+          </Button>
+        </MobileBottomRow>
+      )}
+
+      <MobileOverlay $isOpen={showSunControls && activeView === 'sun'}>
+        <div style={{ flex: 1 }} onClick={() => setShowSunControls(false)} />
+        <ViewSwitcher activeView={activeView} onViewChange={onViewChange} />
+        <WavelengthSelector
+          wavelength={sunWavelength}
+          onWavelengthChange={setSunWavelength}
+          inline
+        />
+        <Button
+          fullWidth
+          onClick={() => setShowSunControls(false)}
           style={{ marginTop: '1rem' }}>
           <X size={20} style={{ marginRight: '8px' }} />
           Close Controls
