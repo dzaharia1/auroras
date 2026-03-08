@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Settings2, X } from 'lucide-react';
 import Timeline from './Timeline';
-import ZoomControl from './ZoomControl';
 import FullscreenControl from './FullscreenControl';
 import ViewSwitcher from './ViewSwitcher';
 import StormTimeline from './StormTimeline';
@@ -59,7 +58,6 @@ const MobileBottomRow = styled.div`
     align-items: center;
     position: absolute;
     bottom: calc(1.5rem + env(safe-area-inset-bottom));
-    left: calc(1.5rem + env(safe-area-inset-left));
     right: calc(1.5rem + env(safe-area-inset-right));
     gap: 0.75rem;
     z-index: 20;
@@ -112,8 +110,6 @@ export default function ViewControlPanel({
   setStormMode,
   handleHistoricalData,
   resetTrigger,
-  zoomRadius,
-  onZoomChange,
   year,
   day,
   onYearChange,
@@ -156,7 +152,6 @@ export default function ViewControlPanel({
 
       {!showControls && activeView === 'earth' && (
         <MobileBottomRow $isIdle={isIdle}>
-          <ZoomControl zoomRadius={zoomRadius} onZoomChange={onZoomChange} />
           <Button
             onClick={() => setShowControls(true)}
             style={{ height: '48px' }}>
@@ -228,8 +223,6 @@ ViewControlPanel.propTypes = {
   setStormMode: PropTypes.func.isRequired,
   handleHistoricalData: PropTypes.func.isRequired,
   resetTrigger: PropTypes.number.isRequired,
-  zoomRadius: PropTypes.number.isRequired,
-  onZoomChange: PropTypes.func.isRequired,
   year: PropTypes.number.isRequired,
   day: PropTypes.number.isRequired,
   onYearChange: PropTypes.func.isRequired,
