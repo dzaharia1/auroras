@@ -24,9 +24,13 @@ const ModalContent = styled.div`
   border-radius: 24px;
   width: 90%;
   max-width: 500px;
+  max-height: 80vh;
   padding: 2rem;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
   position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 `;
 
 const CloseButton = styled.button`
@@ -56,6 +60,8 @@ const SourceList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  overflow-y: auto;
+  flex: 1;
 `;
 
 const SourceItem = styled.div`
@@ -95,7 +101,7 @@ const sources = [
   {
     name: 'NOAA Space Weather Prediction Center (SWPC)',
     description:
-      'Real-time solar wind plasma, magnetometer data, Kp-index, and OVATION aurora models.',
+      'Real-time solar wind plasma, magnetometer data, Kp-index, OVATION aurora models, solar active regions, and solar events (filaments, prominences).',
     link: 'https://www.swpc.noaa.gov/',
   },
   {
@@ -103,6 +109,12 @@ const sources = [
     description:
       'Definitive historical Kp-index data for year-by-year simulations.',
     link: 'https://kp.gfz.de/',
+  },
+  {
+    name: 'Helioviewer',
+    description:
+      'Real-time solar imagery at multiple wavelengths from SDO AIA and HMI instruments.',
+    link: 'https://helioviewer.org/',
   },
   {
     name: 'NASA Blue Marble Next Generation',
