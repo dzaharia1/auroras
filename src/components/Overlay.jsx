@@ -122,32 +122,40 @@ const SunMetricsPanel = styled.div`
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   min-width: 180px;
+
+  @media (max-width: 1280px) {
+    display: ${(p) => (p.$open ? 'flex' : 'none')};
+  }
 `;
 
 const SunControlsButton = styled.button`
-  background: rgba(20, 20, 30, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  color: rgba(255, 255, 255, 0.8);
-  padding: 0.75rem 1.25rem;
-  cursor: pointer;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 400;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  display: none;
 
-  &:hover {
-    background: rgba(20, 20, 30, 0.2);
-    border-color: rgba(255, 255, 255, 0.2);
-  }
+  @media (max-width: 1280px) {
+    display: flex;
+    background: rgba(20, 20, 30, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.2s ease;
+    align-items: center;
+    gap: 0.5rem;
 
-  &:active {
-    transform: scale(0.98);
+    &:hover {
+      background: rgba(20, 20, 30, 0.2);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
   }
 `;
 
@@ -243,17 +251,15 @@ export default function Overlay({
       {/* Sun HUD layers — grouped in a collapsible data panel */}
       {activeView === 'sun' && (
         <SunControlsWrapper $isIdle={isIdle}>
-          {showSunData && (
-            <SunMetricsPanel>
-              {layers.solarFlares && (
-                <SolarFlareLayer xray={spaceWeather?.xray} />
-              )}
-              {layers.solarCycle && <SolarCycleLayer />}
-              {layers.solarWindOrigin && (
-                <SolarWindOriginLayer solarWind={spaceWeather?.solarWind} />
-              )}
-            </SunMetricsPanel>
-          )}
+          <SunMetricsPanel $open={showSunData}>
+            {layers.solarFlares && (
+              <SolarFlareLayer xray={spaceWeather?.xray} />
+            )}
+            {layers.solarCycle && <SolarCycleLayer />}
+            {layers.solarWindOrigin && (
+              <SolarWindOriginLayer solarWind={spaceWeather?.solarWind} />
+            )}
+          </SunMetricsPanel>
           <SunControlsButton onClick={() => setShowSunData((s) => !s)}>
             {showSunData ? <X size={18} /> : <Settings2 size={18} />}
             {showSunData ? 'Close' : 'Data'}
