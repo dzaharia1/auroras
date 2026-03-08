@@ -2,15 +2,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 const Container = styled.div`
-  position: absolute;
-  top: 8rem;
-  right: 2rem;
-  z-index: 15;
   font-family: 'Inter', sans-serif;
   color: white;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  opacity: ${(p) => (p.$isIdle ? 0.2 : 1)};
   text-align: right;
 `;
 
@@ -40,14 +33,14 @@ const Sub = styled.div`
   margin-top: 0.1rem;
 `;
 
-export default function HemisphericPowerLayer({ hemisphericPower, isIdle }) {
+export default function HemisphericPowerLayer({ hemisphericPower }) {
   const current = hemisphericPower?.current;
   if (!current || current.total === null) return null;
 
   const total = Math.round(current.total);
 
   return (
-    <Container $isIdle={isIdle}>
+    <Container>
       <Label>Hemispheric Power</Label>
       <Value $total={total}>{total} GW</Value>
       {current.north !== null && current.south !== null && (
@@ -67,5 +60,4 @@ HemisphericPowerLayer.propTypes = {
       total: PropTypes.number,
     }),
   }),
-  isIdle: PropTypes.bool,
 };

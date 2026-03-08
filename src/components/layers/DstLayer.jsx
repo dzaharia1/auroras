@@ -2,17 +2,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 const Container = styled.div`
-  position: absolute;
-  top: 5.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 15;
   font-family: 'Inter', sans-serif;
   color: white;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  opacity: ${(p) => (p.$isIdle ? 0.2 : 1)};
-  text-align: center;
 `;
 
 const Label = styled.div`
@@ -80,14 +71,14 @@ function renderSparkline(trend, width = 100, height = 24) {
   );
 }
 
-export default function DstLayer({ dst, isIdle }) {
+export default function DstLayer({ dst }) {
   const current = dst?.current;
   const trend = dst?.trend;
 
   if (!current) return null;
 
   return (
-    <Container $isIdle={isIdle}>
+    <Container>
       <Label>Dst Index</Label>
       <Value $value={current.value}>
         {current.value > 0 ? '+' : ''}{Math.round(current.value)} nT
@@ -104,5 +95,4 @@ DstLayer.propTypes = {
       PropTypes.shape({ value: PropTypes.number }),
     ),
   }),
-  isIdle: PropTypes.bool,
 };

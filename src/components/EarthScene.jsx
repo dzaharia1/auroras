@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import Earth from './Earth';
 import { useLayerContext } from '../context/LayerContext';
 import KpLayer from './layers/KpLayer';
@@ -7,31 +8,50 @@ import SolarWindLayer from './layers/SolarWindLayer';
 import DstLayer from './layers/DstLayer';
 import HemisphericPowerLayer from './layers/HemisphericPowerLayer';
 
+const MetricsGroup = styled.div`
+  position: absolute;
+  top: 7rem;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  opacity: ${(p) => (p.$isIdle ? 0.2 : 1)};
+`;
+
+const LeftMetrics = styled(MetricsGroup)`
+  left: calc(2.2rem + env(safe-area-inset-left));
+`;
+
+const RightMetrics = styled(MetricsGroup)`
+  right: calc(2.2rem + env(safe-area-inset-right));
+  align-items: flex-end;
+`;
+
 // HUD layer container — rendered outside Canvas via portals pattern;
 // these are absolutely-positioned HTML overlays imported here for logical grouping
 // and conditionally rendered by App.jsx passing them to Overlay.
 
 export function EarthHUDLayers({ spaceWeather, layers, isIdle }) {
+  const hasLeft = layers.bz || layers.solarWind || layers.dst;
+  const hasRight = layers.hemisphericPower;
+
   return (
     <>
-      {layers.bz && (
-        <BzIndicator solarWind={spaceWeather?.solarWind} isIdle={isIdle} />
+      {hasLeft && (
+        <LeftMetrics $isIdle={isIdle}>
+          {layers.bz && <BzIndicator solarWind={spaceWeather?.solarWind} />}
+          {layers.solarWind && <SolarWindLayer solarWind={spaceWeather?.solarWind} />}
+          {layers.dst && <DstLayer dst={spaceWeather?.dst} />}
+        </LeftMetrics>
       )}
-      {layers.solarWind && (
-        <SolarWindLayer
-          solarWind={spaceWeather?.solarWind}
-          isIdle={isIdle}
-          hasBz={layers.bz}
-        />
-      )}
-      {layers.dst && (
-        <DstLayer dst={spaceWeather?.dst} isIdle={isIdle} />
-      )}
-      {layers.hemisphericPower && (
-        <HemisphericPowerLayer
-          hemisphericPower={spaceWeather?.hemisphericPower}
-          isIdle={isIdle}
-        />
+      {hasRight && (
+        <RightMetrics $isIdle={isIdle}>
+          {layers.hemisphericPower && (
+            <HemisphericPowerLayer hemisphericPower={spaceWeather?.hemisphericPower} />
+          )}
+        </RightMetrics>
       )}
     </>
   );

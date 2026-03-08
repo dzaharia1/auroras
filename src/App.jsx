@@ -69,7 +69,7 @@ function getDayOfYear(date) {
 
 function App() {
   const spaceWeather = useSpaceWeather();
-  const { isIdle } = useIdleTimeout(3000);
+  const { isIdle } = useIdleTimeout(10000);
   const stormTimeline = useStormTimeline();
 
   const [activeView, setActiveView] = useState('earth');

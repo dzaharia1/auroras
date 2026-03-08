@@ -2,15 +2,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 const Container = styled.div`
-  position: absolute;
-  top: 8rem;
-  left: 2rem;
-  z-index: 15;
   font-family: 'Inter', sans-serif;
   color: white;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  opacity: ${(p) => (p.$isIdle ? 0.2 : 1)};
 `;
 
 const Label = styled.div`
@@ -36,14 +29,14 @@ const Arrow = styled.span`
   display: inline-block;
 `;
 
-export default function BzIndicator({ solarWind, isIdle }) {
+export default function BzIndicator({ solarWind }) {
   const bz = solarWind?.bz ?? null;
   if (bz === null) return null;
 
   const southward = bz < 0;
 
   return (
-    <Container $isIdle={isIdle}>
+    <Container>
       <Label>IMF Bz</Label>
       <Value $southward={southward}>
         <Arrow $southward={southward}>↓</Arrow>
@@ -57,5 +50,4 @@ BzIndicator.propTypes = {
   solarWind: PropTypes.shape({
     bz: PropTypes.number,
   }),
-  isIdle: PropTypes.bool,
 };

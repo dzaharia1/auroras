@@ -2,15 +2,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 const Container = styled.div`
-  position: absolute;
-  bottom: 5rem;
-  left: 2rem;
-  z-index: 15;
   font-family: 'Inter', sans-serif;
   color: white;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  opacity: ${(p) => (p.$isIdle ? 0.2 : 1)};
   width: 160px;
 `;
 
@@ -54,12 +47,12 @@ function speedColor(speed) {
   return '#6bcb77';
 }
 
-export default function SolarWindOriginLayer({ solarWind, isIdle }) {
+export default function SolarWindOriginLayer({ solarWind }) {
   const speed = solarWind?.speed ?? null;
   const density = solarWind?.density ?? null;
 
   return (
-    <Container $isIdle={isIdle}>
+    <Container>
       <Label>Solar Wind (L1)</Label>
       <Row>
         <div>
@@ -85,5 +78,4 @@ SolarWindOriginLayer.propTypes = {
     speed: PropTypes.number,
     density: PropTypes.number,
   }),
-  isIdle: PropTypes.bool,
 };

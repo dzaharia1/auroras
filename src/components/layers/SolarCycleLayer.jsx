@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 // Solar Cycle 25: minimum Dec 2019, predicted maximum ~Jul 2025, next minimum ~2030
@@ -19,15 +18,8 @@ function getCyclePhase(progress) {
 }
 
 const Container = styled.div`
-  position: absolute;
-  top: 12rem;
-  left: 2rem;
-  z-index: 15;
   font-family: 'Inter', sans-serif;
   color: white;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  opacity: ${(p) => (p.$isIdle ? 0.2 : 1)};
   width: 160px;
 `;
 
@@ -80,12 +72,12 @@ const Dot = styled.div`
   box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
 `;
 
-export default function SolarCycleLayer({ isIdle }) {
+export default function SolarCycleLayer() {
   const progress = getCycleProgress();
   const phase = getCyclePhase(progress);
 
   return (
-    <Container $isIdle={isIdle}>
+    <Container>
       <Label>Solar Cycle</Label>
       <CycleTitle>Cycle 25</CycleTitle>
       <Phase>{phase}</Phase>
@@ -97,6 +89,3 @@ export default function SolarCycleLayer({ isIdle }) {
   );
 }
 
-SolarCycleLayer.propTypes = {
-  isIdle: PropTypes.bool,
-};
