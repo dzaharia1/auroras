@@ -6,9 +6,9 @@ import Timeline from './Timeline';
 import ZoomControl from './ZoomControl';
 import FullscreenControl from './FullscreenControl';
 import ViewSwitcher from './ViewSwitcher';
-import LayerPanel from './LayerPanel';
 import StormTimeline from './StormTimeline';
 import Button from '../common/Button';
+import WavelengthSelector from '../WavelengthSelector';
 
 const DesktopContainer = styled.div`
   position: absolute;
@@ -119,15 +119,17 @@ export default function ViewControlPanel({
   onYearChange,
   onDayChange,
   stormTimeline,
+  sunWavelength,
+  setSunWavelength,
 }) {
   const [showControls, setShowControls] = useState(false);
+  const [showSunControls, setShowSunControls] = useState(false);
 
   return (
     <>
-      {/* Top-right: View switcher + Layer panel */}
+      {/* Top-right: View switcher */}
       <TopRightControls $isIdle={isIdle}>
         <ViewSwitcher activeView={activeView} onViewChange={onViewChange} />
-        <LayerPanel activeView={activeView} />
       </TopRightControls>
 
       {/* Bottom: Timeline — earth view only */}
@@ -186,6 +188,34 @@ export default function ViewControlPanel({
           Close Controls
         </Button>
       </MobileOverlay>
+
+      {!showSunControls && activeView === 'sun' && (
+        <MobileBottomRow $isIdle={isIdle}>
+          <Button
+            onClick={() => setShowSunControls(true)}
+            style={{ height: '48px' }}>
+            <Settings2 size={18} />
+            Controls
+          </Button>
+        </MobileBottomRow>
+      )}
+
+      <MobileOverlay $isOpen={showSunControls && activeView === 'sun'}>
+        <div style={{ flex: 1 }} onClick={() => setShowSunControls(false)} />
+        <ViewSwitcher activeView={activeView} onViewChange={onViewChange} />
+        <WavelengthSelector
+          wavelength={sunWavelength}
+          onWavelengthChange={setSunWavelength}
+          inline
+        />
+        <Button
+          fullWidth
+          onClick={() => setShowSunControls(false)}
+          style={{ marginTop: '1rem' }}>
+          <X size={20} style={{ marginRight: '8px' }} />
+          Close Controls
+        </Button>
+      </MobileOverlay>
     </>
   );
 }
@@ -209,4 +239,6 @@ ViewControlPanel.propTypes = {
     loading: PropTypes.bool,
     error: PropTypes.string,
   }).isRequired,
+  sunWavelength: PropTypes.string.isRequired,
+  setSunWavelength: PropTypes.func.isRequired,
 };

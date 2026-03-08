@@ -1,12 +1,8 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import PropTypes from 'prop-types';
 import { WAVELENGTH_CONFIG } from '../utils/wavelengthConfig';
 
 const Container = styled.div`
-  position: absolute;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
@@ -15,7 +11,20 @@ const Container = styled.div`
   pointer-events: ${({ $isIdle }) => ($isIdle ? 'none' : 'auto')};
   opacity: ${({ $isIdle }) => ($isIdle ? 0.15 : 1)};
   transition: opacity 0.2s ease;
-  z-index: 10;
+
+  ${({ $inline }) =>
+    !$inline &&
+    css`
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+
+      @media (max-width: 1280px) {
+        display: none;
+      }
+    `}
 `;
 
 const WavelengthButton = styled.button`
@@ -54,9 +63,9 @@ const ShortDesc = styled.span`
   margin-top: 1px;
 `;
 
-export default function WavelengthSelector({ wavelength, onWavelengthChange, isIdle }) {
+export default function WavelengthSelector({ wavelength, onWavelengthChange, isIdle, inline }) {
   return (
-    <Container $isIdle={isIdle}>
+    <Container $isIdle={isIdle} $inline={inline}>
       {WAVELENGTH_CONFIG.map((w) => (
         <WavelengthButton
           key={w.id}
@@ -77,4 +86,5 @@ WavelengthSelector.propTypes = {
   wavelength: PropTypes.string.isRequired,
   onWavelengthChange: PropTypes.func.isRequired,
   isIdle: PropTypes.bool,
+  inline: PropTypes.bool,
 };

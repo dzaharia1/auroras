@@ -9,7 +9,6 @@ import ViewControlPanel from './components/view-controls/ViewControlPanel';
 import { useSpaceWeather } from './hooks/useSpaceWeather';
 import { useIdleTimeout } from './hooks/useIdleTimeout';
 import { useStormTimeline } from './hooks/useStormTimeline';
-import { LayerProvider } from './context/LayerContext';
 import {
   generateStormOvation,
   generateSubstormOvation,
@@ -79,6 +78,7 @@ function App() {
   const [year, setYear] = useState(new Date().getFullYear());
   const [day, setDay] = useState(getDayOfYear(new Date()));
   const [resetTrigger, setResetTrigger] = useState(0);
+  const [sunWavelength, setSunWavelength] = useState('193');
 
   useEffect(() => {
     if (stormMode !== 'historical') {
@@ -138,58 +138,62 @@ function App() {
   }, [year, day]);
 
   return (
-    <LayerProvider>
-      <div className="app-container">
-        <Overlay
-          spaceWeather={effectiveSpaceWeather}
-          stormMode={stormMode}
-          isIdle={isIdle}
-          activeView={activeView}
-        />
-        <ViewControlPanel
-          activeView={activeView}
-          onViewChange={setActiveView}
-          isIdle={isIdle}
-          stormMode={stormMode}
-          setStormMode={setStormMode}
-          handleHistoricalData={handleHistoricalData}
-          resetTrigger={resetTrigger}
-          zoomRadius={zoomRadius}
-          onZoomChange={setZoomRadius}
-          year={year}
-          day={day}
-          onYearChange={setYear}
-          onDayChange={setDay}
-          stormTimeline={stormTimeline}
-        />
+    <div className="app-container">
+      <Overlay
+        spaceWeather={effectiveSpaceWeather}
+        stormMode={stormMode}
+        isIdle={isIdle}
+        activeView={activeView}
+      />
+      <ViewControlPanel
+        activeView={activeView}
+        onViewChange={setActiveView}
+        isIdle={isIdle}
+        stormMode={stormMode}
+        setStormMode={setStormMode}
+        handleHistoricalData={handleHistoricalData}
+        resetTrigger={resetTrigger}
+        zoomRadius={zoomRadius}
+        onZoomChange={setZoomRadius}
+        year={year}
+        day={day}
+        onYearChange={setYear}
+        onDayChange={setDay}
+        stormTimeline={stormTimeline}
+        sunWavelength={sunWavelength}
+        setSunWavelength={setSunWavelength}
+      />
 
-        <div className="canvas-container" style={{ display: activeView === 'sun' ? 'none' : undefined }}>
-          <Canvas camera={{ position: [0, 50, 0], fov: 45 }}>
-            <color attach="background" args={['#000005']} />
-            <EarthCamera
-              zoomRadius={zoomRadius}
-              onZoomChange={setZoomRadius}
+      <div className="canvas-container" style={{ display: activeView === 'sun' ? 'none' : undefined }}>
+        <Canvas camera={{ position: [0, 50, 0], fov: 45 }}>
+          <color attach="background" args={['#000005']} />
+          <EarthCamera
+            zoomRadius={zoomRadius}
+            onZoomChange={setZoomRadius}
+          />
+          <ambientLight intensity={0.2} />
+          <Suspense fallback={null}>
+            <EarthScene
+              position={[0, 0, 0]}
+              spaceWeather={effectiveSpaceWeather}
+              stormMode={stormMode}
+              currentDate={currentDate}
             />
-            <ambientLight intensity={0.2} />
-            <Suspense fallback={null}>
-              <EarthScene
-                position={[0, 0, 0]}
-                spaceWeather={effectiveSpaceWeather}
-                stormMode={stormMode}
-                currentDate={currentDate}
-              />
-              <Preload all />
-            </Suspense>
-          </Canvas>
-        </div>
-
-        {activeView === 'sun' && (
-          <div className="canvas-container">
-            <SunImageView isIdle={isIdle} />
-          </div>
-        )}
+            <Preload all />
+          </Suspense>
+        </Canvas>
       </div>
-    </LayerProvider>
+
+      {activeView === 'sun' && (
+        <div className="canvas-container">
+          <SunImageView
+            isIdle={isIdle}
+            sunWavelength={sunWavelength}
+            setSunWavelength={setSunWavelength}
+          />
+        </div>
+      )}
+    </div>
   );
 }
 
