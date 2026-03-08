@@ -17,6 +17,10 @@ const MetricsGroup = styled.div`
   pointer-events: none;
   transition: opacity 0.3s ease;
   opacity: ${(p) => (p.$isIdle ? 0.2 : 1)};
+
+  @media (max-width: 1280px) {
+    display: none;
+  }
 `;
 
 const LeftMetrics = styled(MetricsGroup)`

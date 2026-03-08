@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled, { keyframes, css } from 'styled-components';
-import { Info } from 'lucide-react';
+import { Info, BarChart2, X } from 'lucide-react';
 import SourcesModal from './SourcesModal';
 import { EarthHUDLayers } from './EarthScene';
 import SolarFlareLayer from './layers/SolarFlareLayer';
 import SolarCycleLayer from './layers/SolarCycleLayer';
 import SolarWindOriginLayer from './layers/SolarWindOriginLayer';
+import BzIndicator from './layers/BzIndicator';
+import SolarWindLayer from './layers/SolarWindLayer';
+import DstLayer from './layers/DstLayer';
+import HemisphericPowerLayer from './layers/HemisphericPowerLayer';
+import Button from './common/Button';
 
 const pulse = keyframes`
   0%, 100% { opacity: 1; }
@@ -108,6 +113,61 @@ const SunControlsWrapper = styled.div`
   & > * {
     pointer-events: ${(p) => (p.$isIdle ? 'none' : 'auto')};
   }
+
+  @media (max-width: 1280px) {
+    display: none;
+  }
+`;
+
+const MobileDataButton = styled.div`
+  display: none;
+  @media (max-width: 1280px) {
+    display: block;
+    position: absolute;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    left: calc(1.5rem + env(safe-area-inset-left));
+    z-index: 20;
+    transition: opacity 0.3s ease;
+    opacity: ${(p) => (p.$isIdle ? 0.15 : 1)};
+    pointer-events: ${(p) => (p.$isIdle ? 'none' : 'auto')};
+  }
+`;
+
+const MobileDataOverlay = styled.div`
+  display: none;
+  @media (max-width: 1280px) {
+    display: ${(p) => (p.$isOpen ? 'flex' : 'none')};
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 1.5rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 30;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    padding: 2rem;
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+    padding-left: calc(2rem + env(safe-area-inset-left));
+    padding-right: calc(2rem + env(safe-area-inset-right));
+    box-sizing: border-box;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+`;
+
+const DataMetricsColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 `;
 
 const SunMetricsPanel = styled.div`
@@ -169,6 +229,7 @@ export default function Overlay({
   activeView,
 }) {
   const [showSources, setShowSources] = useState(false);
+  const [showData, setShowData] = useState(false);
   const { loading } = spaceWeather;
 
   const isLive = stormMode === 'live';
@@ -219,6 +280,42 @@ export default function Overlay({
           </SunMetricsPanel>
         </SunControlsWrapper>
       )}
+
+      {/* Mobile Data button — bottom-left, both views */}
+      {!showData && (
+        <MobileDataButton $isIdle={isIdle}>
+          <Button onClick={() => setShowData(true)} style={{ height: '48px' }}>
+            <BarChart2 size={18} />
+            Data
+          </Button>
+        </MobileDataButton>
+      )}
+
+      {/* Mobile Data overlay */}
+      <MobileDataOverlay $isOpen={showData}>
+        <div style={{ flex: 1 }} onClick={() => setShowData(false)} />
+        <DataMetricsColumn>
+          {activeView === 'earth' && (
+            <>
+              <BzIndicator solarWind={spaceWeather?.solarWind} />
+              <SolarWindLayer solarWind={spaceWeather?.solarWind} />
+              <DstLayer dst={spaceWeather?.dst} />
+              <HemisphericPowerLayer hemisphericPower={spaceWeather?.hemisphericPower} />
+            </>
+          )}
+          {activeView === 'sun' && (
+            <>
+              <SolarFlareLayer xray={spaceWeather?.xray} />
+              <SolarCycleLayer />
+              <SolarWindOriginLayer solarWind={spaceWeather?.solarWind} />
+            </>
+          )}
+        </DataMetricsColumn>
+        <Button fullWidth onClick={() => setShowData(false)} style={{ marginTop: '0.5rem' }}>
+          <X size={20} style={{ marginRight: '8px' }} />
+          Close
+        </Button>
+      </MobileDataOverlay>
 
       {showSources && <SourcesModal onClose={() => setShowSources(false)} />}
     </>

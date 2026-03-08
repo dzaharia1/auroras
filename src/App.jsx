@@ -1,4 +1,4 @@
-import { Suspense, useState, useMemo, useEffect, useCallback } from 'react';
+import { Suspense, useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { Preload } from '@react-three/drei';
 import PropTypes from 'prop-types';
@@ -25,17 +25,54 @@ const CAMERA_ZOOM_RADIUS = 28;
 
 function EarthCamera({ zoomRadius, onZoomChange }) {
   const { camera, size, gl } = useThree();
+  const pinchStartRef = useRef(null);
+  const zoomRadiusRef = useRef(zoomRadius);
+  useEffect(() => { zoomRadiusRef.current = zoomRadius; }, [zoomRadius]);
 
   useEffect(() => {
     const handleWheel = (e) => {
       e.preventDefault();
-      onZoomChange(Math.max(20, Math.min(50, zoomRadius + e.deltaY * 0.05)));
+      onZoomChange(Math.max(20, Math.min(50, zoomRadiusRef.current + e.deltaY * 0.05)));
     };
+
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 2) {
+        pinchStartRef.current = {
+          dist: Math.hypot(
+            e.touches[1].clientX - e.touches[0].clientX,
+            e.touches[1].clientY - e.touches[0].clientY,
+          ),
+          radius: zoomRadiusRef.current,
+        };
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.touches.length === 2 && pinchStartRef.current) {
+        e.preventDefault();
+        const dist = Math.hypot(
+          e.touches[1].clientX - e.touches[0].clientX,
+          e.touches[1].clientY - e.touches[0].clientY,
+        );
+        const scale = pinchStartRef.current.dist / dist;
+        onZoomChange(Math.max(20, Math.min(50, pinchStartRef.current.radius * scale)));
+      }
+    };
+
+    const handleTouchEnd = () => { pinchStartRef.current = null; };
 
     const el = gl.domElement;
     el.addEventListener('wheel', handleWheel, { passive: false });
-    return () => el.removeEventListener('wheel', handleWheel);
-  }, [gl, zoomRadius, onZoomChange]);
+    el.addEventListener('touchstart', handleTouchStart, { passive: true });
+    el.addEventListener('touchmove', handleTouchMove, { passive: false });
+    el.addEventListener('touchend', handleTouchEnd);
+    return () => {
+      el.removeEventListener('wheel', handleWheel);
+      el.removeEventListener('touchstart', handleTouchStart);
+      el.removeEventListener('touchmove', handleTouchMove);
+      el.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [gl, onZoomChange]);
 
   useEffect(() => {
     const aspect = size.width / size.height;
@@ -153,8 +190,6 @@ function App() {
         setStormMode={setStormMode}
         handleHistoricalData={handleHistoricalData}
         resetTrigger={resetTrigger}
-        zoomRadius={zoomRadius}
-        onZoomChange={setZoomRadius}
         year={year}
         day={day}
         onYearChange={setYear}
