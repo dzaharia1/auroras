@@ -105,7 +105,7 @@ export default function Earth({
       if (activePointerCountRef.current > 1) {
         isDragging.current = false;
         if (dragPointerIdRef.current !== null) {
-          try { el.releasePointerCapture(dragPointerIdRef.current); } catch (_) {}
+          try { el.releasePointerCapture(dragPointerIdRef.current); } catch { /* ignore */ }
           dragPointerIdRef.current = null;
         }
         velocityX.current = 0;
@@ -129,7 +129,7 @@ export default function Earth({
       if (e.pointerId === dragPointerIdRef.current) {
         isDragging.current = false;
         dragPointerIdRef.current = null;
-        try { el.releasePointerCapture(e.pointerId); } catch (_) {}
+        try { el.releasePointerCapture(e.pointerId); } catch { /* ignore */ }
         document.body.style.cursor = 'default';
       }
     };

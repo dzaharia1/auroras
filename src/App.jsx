@@ -8,7 +8,6 @@ import Overlay from './components/Overlay';
 import ViewControlPanel from './components/view-controls/ViewControlPanel';
 import { useSpaceWeather } from './hooks/useSpaceWeather';
 import { useIdleTimeout } from './hooks/useIdleTimeout';
-import { useStormTimeline } from './hooks/useStormTimeline';
 import {
   generateStormOvation,
   generateSubstormOvation,
@@ -106,7 +105,6 @@ function getDayOfYear(date) {
 function App() {
   const spaceWeather = useSpaceWeather();
   const { isIdle } = useIdleTimeout(10000);
-  const stormTimeline = useStormTimeline();
 
   const [activeView, setActiveView] = useState('earth');
   const [stormMode, setStormMode] = useState('live');
@@ -194,7 +192,7 @@ function App() {
         day={day}
         onYearChange={setYear}
         onDayChange={setDay}
-        stormTimeline={stormTimeline}
+        spaceWeather={effectiveSpaceWeather}
         sunWavelength={sunWavelength}
         setSunWavelength={setSunWavelength}
       />

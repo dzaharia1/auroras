@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import styled, { keyframes, css } from 'styled-components';
 import { Info, BarChart2, X } from 'lucide-react';
 import SourcesModal from './SourcesModal';
-import { EarthHUDLayers } from './EarthScene';
 import SolarFlareLayer from './layers/SolarFlareLayer';
 import SolarCycleLayer from './layers/SolarCycleLayer';
 import SolarWindOriginLayer from './layers/SolarWindOriginLayer';
@@ -96,9 +95,6 @@ const SourcesButton = styled.button`
     border-color: rgba(255, 255, 255, 0.3);
   }
 
-  @media (max-width: 1280px) {
-    display: none;
-  }
 `;
 
 const SunControlsWrapper = styled.div`
@@ -279,33 +275,6 @@ const MobileBottomRightStack = styled.div`
   }
 `;
 
-const MobileSourcesAboveData = styled.button`
-  display: none;
-  @media (max-width: 1280px) {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    position: absolute;
-    bottom: calc(1.5rem + env(safe-area-inset-bottom) + 48px + 8px);
-    left: calc(1.5rem + env(safe-area-inset-left));
-    z-index: 20;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    color: rgba(255, 255, 255, 0.6);
-    padding: 0.4rem 0.8rem;
-    font-size: 0.7rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.15);
-      color: white;
-      border-color: rgba(255, 255, 255, 0.3);
-    }
-  }
-`;
 
 export default function Overlay({
   spaceWeather,
@@ -345,14 +314,6 @@ export default function Overlay({
           {stormMode === 'storm' && 'G4–G5 Simulation'}
           {stormMode === 'substorm' && 'G1–G3 Simulation'}
         </ModeBadge>
-      )}
-
-      {/* Earth HUD layers — 2D overlays outside Canvas */}
-      {activeView === 'earth' && (
-        <EarthHUDLayers
-          spaceWeather={spaceWeather}
-          isIdle={isIdle}
-        />
       )}
 
       {/* Sun HUD layers — grouped in a collapsible data panel */}
@@ -413,12 +374,6 @@ export default function Overlay({
           </LiveBadge>
         </MobileBottomRightStack>
       )}
-
-      {/* Mobile: sources button 8px above data button (bottom-left, both views) */}
-      <MobileSourcesAboveData onClick={() => setShowSources(true)}>
-        <Info size={14} />
-        Sources
-      </MobileSourcesAboveData>
 
       {showSources && <SourcesModal onClose={() => setShowSources(false)} />}
     </>

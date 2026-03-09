@@ -5,9 +5,12 @@ import { Settings2, X } from 'lucide-react';
 import Timeline from './Timeline';
 import FullscreenControl from './FullscreenControl';
 import ViewSwitcher from './ViewSwitcher';
-import StormTimeline from './StormTimeline';
 import Button from '../common/Button';
 import WavelengthSelector from '../WavelengthSelector';
+import BzIndicator from '../layers/BzIndicator';
+import SolarWindLayer from '../layers/SolarWindLayer';
+import DstLayer from '../layers/DstLayer';
+import HemisphericPowerLayer from '../layers/HemisphericPowerLayer';
 
 const DesktopContainer = styled.div`
   position: absolute;
@@ -46,6 +49,55 @@ const TopRightControls = styled.div`
   opacity: ${(p) => (p.$isIdle ? 0.15 : 1)};
 
   & > * {
+    pointer-events: ${(p) => (p.$isIdle ? 'none' : 'auto')};
+  }
+`;
+
+const EarthMetricsPanel = styled.div`
+  background: rgba(10, 10, 20, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  min-width: 180px;
+  flex-shrink: 0;
+`;
+
+const SunDesktopBottomRight = styled.div`
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  opacity: ${(p) => (p.$isIdle ? 0.15 : 1)};
+
+  & > * {
+    pointer-events: ${(p) => (p.$isIdle ? 'none' : 'auto')};
+  }
+
+  @media (max-width: 1280px) {
+    display: none;
+  }
+`;
+
+const MobileCenterTabs = styled.div`
+  display: none;
+  @media (max-width: 1280px) {
+    display: flex;
+    position: absolute;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    transition: opacity 0.3s ease;
+    opacity: ${(p) => (p.$isIdle ? 0.15 : 1)};
     pointer-events: ${(p) => (p.$isIdle ? 'none' : 'auto')};
   }
 `;
@@ -114,7 +166,7 @@ export default function ViewControlPanel({
   day,
   onYearChange,
   onDayChange,
-  stormTimeline,
+  spaceWeather,
   sunWavelength,
   setSunWavelength,
 }) {
@@ -128,9 +180,15 @@ export default function ViewControlPanel({
         <ViewSwitcher activeView={activeView} onViewChange={onViewChange} />
       </TopRightControls>
 
-      {/* Bottom: Timeline — earth view only */}
+      {/* Bottom: Timeline + Earth data box — earth view only */}
       {activeView === 'earth' && (
         <DesktopContainer $isIdle={isIdle}>
+          <EarthMetricsPanel>
+            <BzIndicator solarWind={spaceWeather?.solarWind} />
+            <SolarWindLayer solarWind={spaceWeather?.solarWind} />
+            <DstLayer dst={spaceWeather?.dst} />
+            <HemisphericPowerLayer hemisphericPower={spaceWeather?.hemisphericPower} />
+          </EarthMetricsPanel>
           <Timeline
             onDataFetched={handleHistoricalData}
             resetTrigger={resetTrigger}
@@ -141,14 +199,21 @@ export default function ViewControlPanel({
             onYearChange={onYearChange}
             onDayChange={onDayChange}
           />
-          <StormTimeline
-            timeline={stormTimeline.timeline}
-            loading={stormTimeline.loading}
-            isIdle={isIdle}
-          />
           <FullscreenControl />
         </DesktopContainer>
       )}
+
+      {/* Bottom-right fullscreen — sun view only */}
+      {activeView === 'sun' && (
+        <SunDesktopBottomRight $isIdle={isIdle}>
+          <FullscreenControl />
+        </SunDesktopBottomRight>
+      )}
+
+      {/* Mobile: centered view switcher tabs */}
+      <MobileCenterTabs $isIdle={isIdle}>
+        <ViewSwitcher activeView={activeView} onViewChange={onViewChange} />
+      </MobileCenterTabs>
 
       {!showControls && activeView === 'earth' && (
         <MobileBottomRow $isIdle={isIdle}>
@@ -227,11 +292,7 @@ ViewControlPanel.propTypes = {
   day: PropTypes.number.isRequired,
   onYearChange: PropTypes.func.isRequired,
   onDayChange: PropTypes.func.isRequired,
-  stormTimeline: PropTypes.shape({
-    timeline: PropTypes.object,
-    loading: PropTypes.bool,
-    error: PropTypes.string,
-  }).isRequired,
+  spaceWeather: PropTypes.object,
   sunWavelength: PropTypes.string.isRequired,
   setSunWavelength: PropTypes.func.isRequired,
 };
