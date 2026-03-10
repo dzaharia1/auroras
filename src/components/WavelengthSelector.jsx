@@ -9,8 +9,6 @@ const Container = styled.div`
   justify-content: center;
   max-width: 90vw;
   pointer-events: ${({ $isIdle }) => ($isIdle ? 'none' : 'auto')};
-  opacity: ${({ $isIdle }) => ($isIdle ? 0.15 : 1)};
-  transition: opacity 0.2s ease;
 
   ${({ $inline }) =>
     !$inline &&
@@ -30,10 +28,11 @@ const Container = styled.div`
 const WavelengthButton = styled.button`
   background: ${({ $active, $color }) =>
     $active ? $color + '33' : 'rgba(0, 0, 0, 0.5)'};
-  border: 1px solid ${({ $active, $color }) =>
-    $active ? $color : 'rgba(255,255,255,0.15)'};
+  border: 1px solid
+    ${({ $active, $color }) => ($active ? $color : 'rgba(255,255,255,0.15)')};
   border-radius: 4px;
-  color: ${({ $active, $color }) => ($active ? $color : 'rgba(255,255,255,0.6)')};
+  color: ${({ $active, $color }) =>
+    $active ? $color : 'rgba(255,255,255,0.6)'};
   cursor: pointer;
   font-size: 11px;
   font-family: monospace;
@@ -63,17 +62,20 @@ const ShortDesc = styled.span`
   margin-top: 1px;
 `;
 
-export default function WavelengthSelector({ wavelength, onWavelengthChange, isIdle, inline }) {
+export default function WavelengthSelector({
+  wavelength,
+  onWavelengthChange,
+  inline,
+}) {
   return (
-    <Container $isIdle={isIdle} $inline={inline}>
+    <Container $inline={inline}>
       {WAVELENGTH_CONFIG.map((w) => (
         <WavelengthButton
           key={w.id}
           $active={wavelength === w.id}
           $color={w.colorHex}
           title={w.description}
-          onClick={() => onWavelengthChange(w.id)}
-        >
+          onClick={() => onWavelengthChange(w.id)}>
           <Label>{w.label}</Label>
           <ShortDesc>{w.shortDesc}</ShortDesc>
         </WavelengthButton>

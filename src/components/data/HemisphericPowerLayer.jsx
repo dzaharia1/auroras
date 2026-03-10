@@ -4,7 +4,6 @@ import styled from 'styled-components';
 const Container = styled.div`
   font-family: 'Inter', sans-serif;
   color: white;
-  text-align: right;
 `;
 
 const Label = styled.div`

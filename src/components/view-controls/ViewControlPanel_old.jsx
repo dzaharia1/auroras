@@ -7,10 +7,10 @@ import FullscreenControl from './FullscreenControl';
 import ViewSwitcher from './ViewSwitcher';
 import Button from '../common/Button';
 import WavelengthSelector from '../WavelengthSelector';
-import BzIndicator from '../layers/BzIndicator';
-import SolarWindLayer from '../layers/SolarWindLayer';
-import DstLayer from '../layers/DstLayer';
-import HemisphericPowerLayer from '../layers/HemisphericPowerLayer';
+import BzIndicator from '../data/BzIndicator';
+import SolarWindLayer from '../data/SolarWindLayer';
+import DstLayer from '../data/DstLayer';
+import HemisphericPowerLayer from '../data/HemisphericPowerLayer';
 
 const DesktopContainer = styled.div`
   position: absolute;
@@ -21,6 +21,7 @@ const DesktopContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: flex-end;
+  justify-content: space-between;
   gap: 36px;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -84,21 +85,6 @@ const SunDesktopBottomRight = styled.div`
 
   @media (max-width: 1280px) {
     display: none;
-  }
-`;
-
-const MobileCenterTabs = styled.div`
-  display: none;
-  @media (max-width: 1280px) {
-    display: flex;
-    position: absolute;
-    bottom: calc(1.5rem + env(safe-area-inset-bottom));
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 20;
-    transition: opacity 0.3s ease;
-    opacity: ${(p) => (p.$isIdle ? 0.15 : 1)};
-    pointer-events: ${(p) => (p.$isIdle ? 'none' : 'auto')};
   }
 `;
 
@@ -187,7 +173,9 @@ export default function ViewControlPanel({
             <BzIndicator solarWind={spaceWeather?.solarWind} />
             <SolarWindLayer solarWind={spaceWeather?.solarWind} />
             <DstLayer dst={spaceWeather?.dst} />
-            <HemisphericPowerLayer hemisphericPower={spaceWeather?.hemisphericPower} />
+            <HemisphericPowerLayer
+              hemisphericPower={spaceWeather?.hemisphericPower}
+            />
           </EarthMetricsPanel>
           <Timeline
             onDataFetched={handleHistoricalData}
@@ -210,11 +198,6 @@ export default function ViewControlPanel({
         </SunDesktopBottomRight>
       )}
 
-      {/* Mobile: centered view switcher tabs */}
-      <MobileCenterTabs $isIdle={isIdle}>
-        <ViewSwitcher activeView={activeView} onViewChange={onViewChange} />
-      </MobileCenterTabs>
-
       {!showControls && activeView === 'earth' && (
         <MobileBottomRow $isIdle={isIdle}>
           <Button
@@ -228,7 +211,7 @@ export default function ViewControlPanel({
 
       <MobileOverlay $isOpen={showControls && activeView === 'earth'}>
         <div style={{ flex: 1 }} onClick={() => setShowControls(false)} />
-        <ViewSwitcher activeView={activeView} onViewChange={onViewChange} />
+        {/* <ViewSwitcher activeView={activeView} onViewChange={onViewChange} /> */}
         <Timeline
           onDataFetched={handleHistoricalData}
           resetTrigger={resetTrigger}
@@ -262,7 +245,7 @@ export default function ViewControlPanel({
 
       <MobileOverlay $isOpen={showSunControls && activeView === 'sun'}>
         <div style={{ flex: 1 }} onClick={() => setShowSunControls(false)} />
-        <ViewSwitcher activeView={activeView} onViewChange={onViewChange} />
+        {/* <ViewSwitcher activeView={activeView} onViewChange={onViewChange} /> */}
         <WavelengthSelector
           wavelength={sunWavelength}
           onWavelengthChange={setSunWavelength}
