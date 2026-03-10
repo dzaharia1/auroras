@@ -40,6 +40,13 @@ const OverlayContainer = styled.div`
   padding-right: calc(2rem + env(safe-area-inset-right));
   box-sizing: border-box;
   z-index: 10;
+
+  @media (max-width: 1150px) {
+    padding-top: calc(1rem + env(safe-area-inset-top));
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    padding-left: calc(1rem + env(safe-area-inset-left));
+    padding-right: calc(1rem + env(safe-area-inset-right));
+  }
 `;
 
 const OverlayRow = styled.div`
