@@ -1,11 +1,18 @@
-import { Suspense, useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import {
+  Suspense,
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+  useRef,
+} from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { Preload } from '@react-three/drei';
 import PropTypes from 'prop-types';
 import EarthScene from './components/EarthScene';
 import SunImageView from './components/SunImageView';
 import Overlay from './components/Overlay';
-import ViewControlPanel from './components/view-controls/ViewControlPanel';
+// import ViewControlPanel from './components/view-controls/ViewControlPanel';
 import { useSpaceWeather } from './hooks/useSpaceWeather';
 import { useIdleTimeout } from './hooks/useIdleTimeout';
 import {
@@ -26,12 +33,16 @@ function EarthCamera({ zoomRadius, onZoomChange }) {
   const { camera, size, gl } = useThree();
   const pinchStartRef = useRef(null);
   const zoomRadiusRef = useRef(zoomRadius);
-  useEffect(() => { zoomRadiusRef.current = zoomRadius; }, [zoomRadius]);
+  useEffect(() => {
+    zoomRadiusRef.current = zoomRadius;
+  }, [zoomRadius]);
 
   useEffect(() => {
     const handleWheel = (e) => {
       e.preventDefault();
-      onZoomChange(Math.max(10, Math.min(50, zoomRadiusRef.current + e.deltaY * 0.05)));
+      onZoomChange(
+        Math.max(10, Math.min(50, zoomRadiusRef.current + e.deltaY * 0.05)),
+      );
     };
 
     const handleTouchStart = (e) => {
@@ -54,11 +65,15 @@ function EarthCamera({ zoomRadius, onZoomChange }) {
           e.touches[1].clientY - e.touches[0].clientY,
         );
         const scale = pinchStartRef.current.dist / dist;
-        onZoomChange(Math.max(10, Math.min(50, pinchStartRef.current.radius * scale)));
+        onZoomChange(
+          Math.max(10, Math.min(50, pinchStartRef.current.radius * scale)),
+        );
       }
     };
 
-    const handleTouchEnd = () => { pinchStartRef.current = null; };
+    const handleTouchEnd = () => {
+      pinchStartRef.current = null;
+    };
 
     const el = gl.domElement;
     el.addEventListener('wheel', handleWheel, { passive: false });
@@ -174,13 +189,13 @@ function App() {
 
   return (
     <div className="app-container">
-      <Overlay
+      {/* <Overlay
         spaceWeather={effectiveSpaceWeather}
         stormMode={stormMode}
         isIdle={isIdle}
         activeView={activeView}
-      />
-      <ViewControlPanel
+      /> */}
+      {/* <ViewControlPanel
         activeView={activeView}
         onViewChange={setActiveView}
         isIdle={isIdle}
@@ -195,15 +210,30 @@ function App() {
         spaceWeather={effectiveSpaceWeather}
         sunWavelength={sunWavelength}
         setSunWavelength={setSunWavelength}
+      /> */}
+      <Overlay
+        spaceWeather={effectiveSpaceWeather}
+        stormMode={stormMode}
+        isIdle={isIdle}
+        activeView={activeView}
+        onViewChange={setActiveView}
+        setStormMode={setStormMode}
+        handleHistoricalData={handleHistoricalData}
+        resetTrigger={resetTrigger}
+        year={year}
+        day={day}
+        onYearChange={setYear}
+        onDayChange={setDay}
+        sunWavelength={sunWavelength}
+        setSunWavelength={setSunWavelength}
       />
 
-      <div className="canvas-container" style={{ display: activeView === 'sun' ? 'none' : undefined }}>
+      <div
+        className="canvas-container"
+        style={{ display: activeView === 'sun' ? 'none' : undefined }}>
         <Canvas camera={{ position: [0, 50, 0], fov: 45 }}>
           <color attach="background" args={['#000005']} />
-          <EarthCamera
-            zoomRadius={zoomRadius}
-            onZoomChange={setZoomRadius}
-          />
+          <EarthCamera zoomRadius={zoomRadius} onZoomChange={setZoomRadius} />
           <ambientLight intensity={0.2} />
           <Suspense fallback={null}>
             <EarthScene
@@ -219,11 +249,7 @@ function App() {
 
       {activeView === 'sun' && (
         <div className="canvas-container">
-          <SunImageView
-            isIdle={isIdle}
-            sunWavelength={sunWavelength}
-            setSunWavelength={setSunWavelength}
-          />
+          <SunImageView sunWavelength={sunWavelength} />
         </div>
       )}
     </div>

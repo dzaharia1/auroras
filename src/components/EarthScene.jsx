@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import Earth from './Earth';
-import KpLayer from './layers/KpLayer';
+import KpLayer from './data/KpLayer';
 
 // 3D scene component — rendered inside Canvas
 export default function EarthScene({
@@ -17,9 +17,7 @@ export default function EarthScene({
         stormMode={stormMode}
         currentDate={currentDate}
       />
-      {spaceWeather?.kp && (
-        <KpLayer kp={spaceWeather.kp} position={position} />
-      )}
+      {spaceWeather?.kp && <KpLayer kp={spaceWeather.kp} position={position} />}
     </>
   );
 }
