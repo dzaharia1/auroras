@@ -4,16 +4,19 @@ import styled from 'styled-components';
 const Container = styled.div`
   display: flex;
   flex-direction: row;
+  width: fit-content;
   background: rgba(10, 10, 20, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   overflow: hidden;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  width: fit-content;
 `;
 
 const SwitchButton = styled.button`
-  background: ${(p) => (p.$active ? 'rgba(255, 255, 255, 0.15)' : 'transparent')};
+  background: ${(p) =>
+    p.$active ? 'rgba(255, 255, 255, 0.15)' : 'transparent'};
   border: none;
   color: ${(p) => (p.$active ? 'white' : 'rgba(255, 255, 255, 0.45)')};
   padding: 0.45rem 1rem;
@@ -21,8 +24,11 @@ const SwitchButton = styled.button`
   font-weight: ${(p) => (p.$active ? '600' : '400')};
   font-family: 'Inter', sans-serif;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
   letter-spacing: 0.03em;
+  width: fit-content;
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);

@@ -8,6 +8,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  max-width: 1280px;
   background: ${(props) =>
     props.$isMobile ? 'transparent' : 'rgba(20, 20, 30, 0.4)'};
   backdrop-filter: ${(props) => (props.$isMobile ? 'none' : 'blur(12px)')};
@@ -150,10 +151,10 @@ const EventButton = styled.button`
     height: 6px;
     border-radius: 50%;
     background: ${(props) => {
-    if (props.$gValue >= 5) return '#ff4d4d';
-    if (props.$gValue >= 4) return '#ffb84d';
-    return '#8cdcd2';
-  }};
+      if (props.$gValue >= 5) return '#ff4d4d';
+      if (props.$gValue >= 4) return '#ffb84d';
+      return '#8cdcd2';
+    }};
   }
 `;
 
@@ -332,26 +333,31 @@ export default function Timeline({
     fetchMajorEvents();
   }, []);
 
-  const fetchHistoricalData = useCallback(async (targetDate) => {
-    setLoading(true);
-    const dateStr = formatDateForApi(targetDate);
+  const fetchHistoricalData = useCallback(
+    async (targetDate) => {
+      setLoading(true);
+      const dateStr = formatDateForApi(targetDate);
 
-    try {
-      const res = await fetch(`${API_BASE}/aurora/historical?date=${dateStr}`);
-      if (!res.ok) throw new Error('Failed to fetch');
-      const data = await res.json();
+      try {
+        const res = await fetch(
+          `${API_BASE}/aurora/historical?date=${dateStr}`,
+        );
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
 
-      setHistoricalData(data);
-      if (onDataFetched) {
-        onDataFetched({ date: targetDate, data });
+        setHistoricalData(data);
+        if (onDataFetched) {
+          onDataFetched({ date: targetDate, data });
+        }
+      } catch (err) {
+        console.error(err);
+        setHistoricalData({ error: true });
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error(err);
-      setHistoricalData({ error: true });
-    } finally {
-      setLoading(false);
-    }
-  }, [onDataFetched]);
+    },
+    [onDataFetched],
+  );
 
   // Keep fetchRef current so the interval closure always has the latest version
   fetchRef.current = fetchHistoricalData;
