@@ -5,13 +5,13 @@ const Container = styled.div`
   display: flex;
   flex-direction: row;
   width: fit-content;
+  flex-shrink: 0;
   background: rgba(10, 10, 20, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   overflow: hidden;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  width: fit-content;
 `;
 
 const SwitchButton = styled.button`
