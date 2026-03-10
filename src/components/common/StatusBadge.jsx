@@ -15,6 +15,7 @@ const Badge = styled.div`
   padding: 0.3rem 0.75rem;
   border-radius: 20px;
   pointer-events: none;
+  flex-shrink: 0;
   background: ${(p) =>
     p.$live ? 'rgba(100, 220, 180, 0.15)' : 'rgba(255, 180, 60, 0.15)'};
   border: 1px solid
