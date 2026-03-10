@@ -96,9 +96,9 @@ export default function SunImageView({ isIdle, sunWavelength, setSunWavelength }
   const latestWavelengthRef = useRef(sunWavelength);
   const refreshTimerRef = useRef(null);
 
-  // Shift marker data 12 hours earlier than the image to compensate for alignment offset
+  // Shift marker data 8 hours earlier than the image to compensate for alignment offset
   const markerDate = imageObservedDate
-    ? new Date(new Date(imageObservedDate).getTime() - 12 * 60 * 60 * 1000)
+    ? new Date(new Date(imageObservedDate).getTime() - 8 * 60 * 60 * 1000)
         .toISOString()
         .slice(0, 10)
     : null;
