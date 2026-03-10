@@ -17,6 +17,7 @@ import MobileDataOverlay from './MobileDataOverlay';
 import Timeline from './view-controls/Timeline';
 import FullscreenControl from './view-controls/FullscreenControl';
 import WavelengthSelector from './WavelengthSelector';
+import MobileControlsDialog from './view-controls/MobileControlsDialog';
 
 const OverlayContainer = styled.div`
   pointer-events: none;
@@ -212,8 +213,7 @@ const Overlay = ({
 }) => {
   const [showSources, setShowSources] = useState(false);
   const [mobileOverlayOpen, setMobileOverlayOpen] = useState(false);
-  const [showEarthControls, setShowEarthControls] = useState(false);
-  const [showSunControls, setShowSunControls] = useState(false);
+  const [showControls, setShowControls] = useState(false);
   const isLive = stormMode === 'live';
 
   return (
@@ -306,7 +306,7 @@ const Overlay = ({
             />
           )}
           <Button
-            onClick={() => setShowSunControls(true)}
+            onClick={() => setShowControls(true)}
             style={{ height: '48px' }}>
             <Settings2 size={18} />
             Controls
@@ -322,6 +322,21 @@ const Overlay = ({
       />
       {mobileOverlayOpen && <MobileDataOverlay />}
       {showSources && <SourcesModal onClose={() => setShowSources(false)} />}
+      <MobileControlsDialog
+        isOpen={showControls}
+        onClose={() => setShowControls(false)}
+        activeView={activeView}
+        handleHistoricalData={handleHistoricalData}
+        resetTrigger={resetTrigger}
+        stormMode={stormMode}
+        setStormMode={setStormMode}
+        year={year}
+        day={day}
+        onYearChange={onYearChange}
+        onDayChange={onDayChange}
+        sunWavelength={sunWavelength}
+        setSunWavelength={setSunWavelength}
+      />
     </>
   );
 };
