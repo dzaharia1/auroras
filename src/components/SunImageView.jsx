@@ -96,9 +96,8 @@ export default function SunImageView({ sunWavelength }) {
 
   // Shift marker data 4 hours earlier than the image to compensate for alignment offset
   const markerDate = imageObservedDate
-    ? new Date(new Date(imageObservedDate).getTime() - 4 * 60 * 60 * 1000)
-        .toISOString()
-        .slice(0, 10)
+    ? // ? new Date(new Date(imageObservedDate).getTime() - 4 * 60 * 60 * 1000)
+      new Date(new Date(imageObservedDate).getTime()).toISOString().slice(0, 10)
     : null;
 
   // Data hooks for overlay — pass the shifted date so markers align with the image

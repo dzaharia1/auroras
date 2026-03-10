@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Settings2, X } from 'lucide-react';
+import { Settings2 } from 'lucide-react';
 import Timeline from './Timeline';
 import FullscreenControl from './FullscreenControl';
 import ViewSwitcher from './ViewSwitcher';
 import Button from '../common/Button';
+<<<<<<< HEAD
 import WavelengthSelector from '../WavelengthSelector';
+=======
+import MobileControlsDialog from './MobileControlsDialog';
+>>>>>>> 2a5e1e1 (feat: Introduce `MobileControlsDialog` component to centralize mobile view controls previously duplicated across `Overlay` and `ViewControlPanel`.)
 import BzIndicator from '../data/BzIndicator';
 import SolarWindLayer from '../data/SolarWindLayer';
 import DstLayer from '../data/DstLayer';
@@ -105,41 +109,6 @@ const MobileBottomRow = styled.div`
   }
 `;
 
-const MobileOverlay = styled.div`
-  display: none;
-  @media (max-width: 1280px) {
-    display: ${(props) => (props.$isOpen ? 'flex' : 'none')};
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: 2rem;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    z-index: 30;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    padding: 2rem;
-    padding-bottom: calc(2rem + env(safe-area-inset-bottom));
-    padding-left: calc(2rem + env(safe-area-inset-left));
-    padding-right: calc(2rem + env(safe-area-inset-right));
-    box-sizing: border-box;
-    animation: fadeIn 0.3s ease;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-`;
-
 export default function ViewControlPanel({
   activeView,
   onViewChange,
@@ -198,10 +167,19 @@ export default function ViewControlPanel({
         </SunDesktopBottomRight>
       )}
 
+<<<<<<< HEAD
       {!showControls && activeView === 'earth' && (
+=======
+      {((activeView === 'earth' && !showControls) ||
+        (activeView === 'sun' && !showSunControls)) && (
+>>>>>>> 2a5e1e1 (feat: Introduce `MobileControlsDialog` component to centralize mobile view controls previously duplicated across `Overlay` and `ViewControlPanel`.)
         <MobileBottomRow $isIdle={isIdle}>
           <Button
-            onClick={() => setShowControls(true)}
+            onClick={() =>
+              activeView === 'earth'
+                ? setShowControls(true)
+                : setShowSunControls(true)
+            }
             style={{ height: '48px' }}>
             <Settings2 size={18} />
             Controls
@@ -209,6 +187,7 @@ export default function ViewControlPanel({
         </MobileBottomRow>
       )}
 
+<<<<<<< HEAD
       <MobileOverlay $isOpen={showControls && activeView === 'earth'}>
         <div style={{ flex: 1 }} onClick={() => setShowControls(false)} />
         {/* <ViewSwitcher activeView={activeView} onViewChange={onViewChange} /> */}
@@ -259,6 +238,27 @@ export default function ViewControlPanel({
           Close Controls
         </Button>
       </MobileOverlay>
+=======
+      <MobileControlsDialog
+        isOpen={activeView === 'earth' ? showControls : showSunControls}
+        onClose={() =>
+          activeView === 'earth'
+            ? setShowControls(false)
+            : setShowSunControls(false)
+        }
+        activeView={activeView}
+        handleHistoricalData={handleHistoricalData}
+        resetTrigger={resetTrigger}
+        stormMode={stormMode}
+        setStormMode={setStormMode}
+        year={year}
+        day={day}
+        onYearChange={onYearChange}
+        onDayChange={onDayChange}
+        sunWavelength={sunWavelength}
+        setSunWavelength={setSunWavelength}
+      />
+>>>>>>> 2a5e1e1 (feat: Introduce `MobileControlsDialog` component to centralize mobile view controls previously duplicated across `Overlay` and `ViewControlPanel`.)
     </>
   );
 }
