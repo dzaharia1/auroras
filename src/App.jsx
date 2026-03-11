@@ -10,6 +10,7 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { Preload } from '@react-three/drei';
 import PropTypes from 'prop-types';
 import EarthScene from './components/EarthScene';
+import { DEFAULT_WAVELENGTH } from './utils/wavelengthConfig';
 import SunImageView from './components/SunImageView';
 import Overlay from './components/Overlay';
 // import ViewControlPanel from './components/view-controls/ViewControlPanel';
@@ -128,7 +129,7 @@ function App() {
   const [year, setYear] = useState(new Date().getFullYear());
   const [day, setDay] = useState(getDayOfYear(new Date()));
   const [resetTrigger, setResetTrigger] = useState(0);
-  const [sunWavelength, setSunWavelength] = useState('193');
+  const [sunWavelength, setSunWavelength] = useState(DEFAULT_WAVELENGTH);
 
   useEffect(() => {
     if (stormMode !== 'historical') {
