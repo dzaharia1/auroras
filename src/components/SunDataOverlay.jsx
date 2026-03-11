@@ -186,7 +186,8 @@ export default function SunDataOverlay({
             fill="rgba(255, 200, 60, 0.5)"
             fontSize={11}
             fontFamily="monospace">
-            No active regions currently reported
+            No active regions are currently reported, or data is not available
+            for this date
           </text>
         )}
 
