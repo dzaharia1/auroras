@@ -79,4 +79,4 @@ export const WAVELENGTH_MAP = Object.fromEntries(
   WAVELENGTH_CONFIG.map((w) => [w.id, w]),
 );
 
-export const DEFAULT_WAVELENGTH = '193';
+export const DEFAULT_WAVELENGTH = '335';
