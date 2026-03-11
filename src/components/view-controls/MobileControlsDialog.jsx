@@ -58,19 +58,17 @@ const MobileControlsDialog = ({
   return (
     <StyledOverlay $isOpen={isOpen}>
       <div style={{ flex: 1 }} onClick={onClose} />
-      {activeView === 'earth' && (
-        <Timeline
-          onDataFetched={handleHistoricalData}
-          resetTrigger={resetTrigger}
-          stormMode={stormMode}
-          setStormMode={setStormMode}
-          isMobile
-          year={year}
-          day={day}
-          onYearChange={onYearChange}
-          onDayChange={onDayChange}
-        />
-      )}
+      <Timeline
+        onDataFetched={handleHistoricalData}
+        resetTrigger={resetTrigger}
+        stormMode={stormMode}
+        setStormMode={setStormMode}
+        isMobile
+        year={year}
+        day={day}
+        onYearChange={onYearChange}
+        onDayChange={onDayChange}
+      />
       {activeView === 'sun' && (
         <WavelengthSelector
           wavelength={sunWavelength}

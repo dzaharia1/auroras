@@ -264,18 +264,16 @@ const Overlay = ({
               </>
             )}
           </DataColumn>
-          {activeView === 'earth' && (
-            <Timeline
-              onDataFetched={handleHistoricalData}
-              resetTrigger={resetTrigger}
-              stormMode={stormMode}
-              setStormMode={setStormMode}
-              year={year}
-              day={day}
-              onYearChange={onYearChange}
-              onDayChange={onDayChange}
-            />
-          )}
+          <Timeline
+            onDataFetched={handleHistoricalData}
+            resetTrigger={resetTrigger}
+            stormMode={stormMode}
+            setStormMode={setStormMode}
+            year={year}
+            day={day}
+            onYearChange={onYearChange}
+            onDayChange={onDayChange}
+          />
           {activeView === 'sun' && (
             <WavelengthSelector
               wavelength={sunWavelength}

@@ -62,16 +62,19 @@ const StaleIndicator = styled.div`
   z-index: 5;
 `;
 
-function buildImageUrl(wavelength, cacheBust) {
-  return `${API_BASE}/sun/image?wavelength=${wavelength}&width=1024&height=1024${cacheBust ? `&_t=${cacheBust}` : ''}`;
+function buildImageUrl(wavelength, cacheBust, date) {
+  let url = `${API_BASE}/sun/image?wavelength=${wavelength}&width=1024&height=1024`;
+  if (date) url += `&date=${date}`;
+  if (cacheBust) url += `&_t=${cacheBust}`;
+  return url;
 }
 
-export default function SunImageView({ sunWavelength }) {
+export default function SunImageView({ sunWavelength, sunDate }) {
   const [currentUrl, setCurrentUrl] = useState(() =>
-    buildImageUrl(sunWavelength, null),
+    buildImageUrl(sunWavelength, null, sunDate),
   );
   const [displayUrl, setDisplayUrl] = useState(() =>
-    buildImageUrl(sunWavelength, null),
+    buildImageUrl(sunWavelength, null, sunDate),
   );
   const [loading, setLoading] = useState(false);
   const [loadedAt, setLoadedAt] = useState(null);
@@ -94,11 +97,13 @@ export default function SunImageView({ sunWavelength }) {
   const latestWavelengthRef = useRef(sunWavelength);
   const refreshTimerRef = useRef(null);
 
-  // Shift marker data 4 hours earlier than the image to compensate for alignment offset
-  const markerDate = imageObservedDate
-    ? // ? new Date(new Date(imageObservedDate).getTime() - 4 * 60 * 60 * 1000)
-      new Date(new Date(imageObservedDate).getTime()).toISOString().slice(0, 10)
-    : null;
+  // Use the explicitly selected date if provided, otherwise fall back to the
+  // observed date from the image header
+  const markerDate =
+    sunDate ||
+    (imageObservedDate
+      ? new Date(new Date(imageObservedDate).getTime()).toISOString().slice(0, 10)
+      : null);
 
   // Data hooks for overlay — pass the shifted date so markers align with the image
   const { regions } = useSunRegions(markerDate);
@@ -167,25 +172,26 @@ export default function SunImageView({ sunWavelength }) {
     };
   }, [displayUrl]); // re-attach when the display image changes
 
-  const loadImage = useCallback((wavelength, cacheBust = null) => {
-    const url = buildImageUrl(wavelength, cacheBust);
+  const loadImage = useCallback((wavelength, cacheBust = null, date = null) => {
+    const url = buildImageUrl(wavelength, cacheBust, date);
     setCurrentUrl(url);
     setLoading(true);
   }, []);
 
-  // When wavelength changes, load new image immediately
+  // When wavelength or date changes, load new image immediately
   useEffect(() => {
     latestWavelengthRef.current = sunWavelength;
-    loadImage(sunWavelength);
-  }, [sunWavelength, loadImage]);
+    loadImage(sunWavelength, null, sunDate);
+  }, [sunWavelength, sunDate, loadImage]);
 
-  // 5-minute auto-refresh
+  // 5-minute auto-refresh — only in live mode (no explicit date)
   useEffect(() => {
+    if (sunDate) return;
     refreshTimerRef.current = setInterval(() => {
-      loadImage(latestWavelengthRef.current, Date.now());
+      loadImage(latestWavelengthRef.current, Date.now(), null);
     }, REFRESH_INTERVAL_MS);
     return () => clearInterval(refreshTimerRef.current);
-  }, [loadImage]);
+  }, [loadImage, sunDate]);
 
   const handleImageLoad = useCallback(
     (e) => {
@@ -271,4 +277,5 @@ export default function SunImageView({ sunWavelength }) {
 
 SunImageView.propTypes = {
   sunWavelength: PropTypes.string.isRequired,
+  sunDate: PropTypes.string,
 };

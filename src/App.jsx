@@ -188,6 +188,13 @@ function App() {
     return d;
   }, [year, day]);
 
+  const sunDate = useMemo(() => {
+    if (stormMode !== 'historical') return null;
+    const d = new Date(year, 0, 1);
+    d.setDate(day);
+    return d.toISOString().slice(0, 10);
+  }, [stormMode, year, day]);
+
   return (
     <div className="app-container">
       {/* <Overlay
@@ -250,7 +257,7 @@ function App() {
 
       {activeView === 'sun' && (
         <div className="canvas-container">
-          <SunImageView sunWavelength={sunWavelength} />
+          <SunImageView sunWavelength={sunWavelength} sunDate={sunDate} />
         </div>
       )}
     </div>
