@@ -9,6 +9,7 @@ const Container = styled.div`
   flex-direction: column;
   gap: 1rem;
   max-width: 1280px;
+  ${(props) => (props.$isMobile ? '' : 'flex: 1;')}
   background: ${(props) =>
     props.$isMobile ? 'transparent' : 'rgba(20, 20, 30, 0.4)'};
   backdrop-filter: ${(props) => (props.$isMobile ? 'none' : 'blur(12px)')};
@@ -42,8 +43,9 @@ const HeaderRow = styled.div`
 
 const InfoBox = styled.div`
   display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0;
+  flex-shrink: 0;
 
   @media (max-width: 1280px) {
     flex-direction: row;

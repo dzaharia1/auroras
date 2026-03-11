@@ -1,10 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import SunImageOverlay from './SunImageOverlay';
-import { useSunRegions } from '../hooks/useSunRegions';
-import { useSunEvents } from '../hooks/useSunEvents';
-import { SUN_IMAGE_PARAMS } from '../utils/solarCoords';
+import SunDataOverlay from './SunDataOverlay';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL;
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
@@ -102,12 +99,12 @@ export default function SunImageView({ sunWavelength, sunDate }) {
   const markerDate =
     sunDate ||
     (imageObservedDate
-      ? new Date(new Date(imageObservedDate).getTime()).toISOString().slice(0, 10)
+      ? new Date(new Date(imageObservedDate).getTime())
+          .toISOString()
+          .slice(0, 10)
       : null);
 
-  // Data hooks for overlay — pass the shifted date so markers align with the image
-  const { regions } = useSunRegions(markerDate);
-  const { events } = useSunEvents(markerDate);
+  // Data hooks for overlay — now fetched inside SunDataOverlay
 
   // Fetch the X-Image-Date header from the backend to learn when the image was taken
   useEffect(() => {
@@ -255,10 +252,8 @@ export default function SunImageView({ sunWavelength, sunDate }) {
               height: imageDims.height,
               pointerEvents: 'none',
             }}>
-            <SunImageOverlay
-              regions={regions}
-              events={events}
-              imageParams={SUN_IMAGE_PARAMS}
+            <SunDataOverlay
+              date={markerDate}
               showRegions={true}
               showProminences={true}
               containerWidth={imageDims.width}

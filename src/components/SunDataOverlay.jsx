@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types';
 import { heliographicToPixel, SUN_IMAGE_PARAMS } from '../utils/solarCoords';
+import { useSunRegions } from '../hooks/useSunRegions';
+import { useSunEvents } from '../hooks/useSunEvents';
 
 // Minimum outline radius for very small active regions
 const MIN_REGION_RADIUS = 24;
@@ -150,14 +152,15 @@ ProminenceMarker.propTypes = {
   scaleY: PropTypes.number.isRequired,
 };
 
-export default function SunImageOverlay({
-  regions,
-  events,
+export default function SunDataOverlay({
+  date,
   showRegions,
   showProminences,
   containerWidth,
   containerHeight,
 }) {
+  const { regions } = useSunRegions(date);
+  const { events } = useSunEvents(date);
   const scaleX = containerWidth / SUN_IMAGE_PARAMS.width;
   const scaleY = containerHeight / SUN_IMAGE_PARAMS.height;
 
@@ -199,16 +202,20 @@ export default function SunImageOverlay({
 
         {showProminences &&
           events.map((e, i) => (
-            <ProminenceMarker key={i} event={e} scaleX={scaleX} scaleY={scaleY} />
+            <ProminenceMarker
+              key={i}
+              event={e}
+              scaleX={scaleX}
+              scaleY={scaleY}
+            />
           ))}
       </g>
     </svg>
   );
 }
 
-SunImageOverlay.propTypes = {
-  regions: PropTypes.arrayOf(PropTypes.object).isRequired,
-  events: PropTypes.arrayOf(PropTypes.object).isRequired,
+SunDataOverlay.propTypes = {
+  date: PropTypes.string,
   showRegions: PropTypes.bool,
   showProminences: PropTypes.bool,
   containerWidth: PropTypes.number,

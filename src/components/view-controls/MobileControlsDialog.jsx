@@ -58,6 +58,13 @@ const MobileControlsDialog = ({
   return (
     <StyledOverlay $isOpen={isOpen}>
       <div style={{ flex: 1 }} onClick={onClose} />
+      {activeView === 'sun' && (
+        <WavelengthSelector
+          wavelength={sunWavelength}
+          onWavelengthChange={setSunWavelength}
+          inline
+        />
+      )}
       <Timeline
         onDataFetched={handleHistoricalData}
         resetTrigger={resetTrigger}
@@ -69,13 +76,6 @@ const MobileControlsDialog = ({
         onYearChange={onYearChange}
         onDayChange={onDayChange}
       />
-      {activeView === 'sun' && (
-        <WavelengthSelector
-          wavelength={sunWavelength}
-          onWavelengthChange={setSunWavelength}
-          inline
-        />
-      )}
       <Button fullWidth onClick={onClose} style={{ marginTop: '1rem' }}>
         <X size={20} style={{ marginRight: '8px' }} />
         Close Controls

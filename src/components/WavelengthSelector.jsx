@@ -9,6 +9,7 @@ const Container = styled.div`
   justify-content: center;
   max-width: 90vw;
   pointer-events: ${({ $isIdle }) => ($isIdle ? 'none' : 'auto')};
+  flex: 1;
 
   ${({ $inline }) =>
     !$inline &&
