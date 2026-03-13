@@ -34,18 +34,22 @@ const Sub = styled.div`
 
 export default function HemisphericPowerLayer({ hemisphericPower }) {
   const current = hemisphericPower?.current;
-  if (!current || current.total === null) return null;
-
-  const total = Math.round(current.total);
+  const total = current?.total != null ? Math.round(current.total) : null;
 
   return (
     <Container>
       <Label>Hemispheric Power</Label>
-      <Value $total={total}>{total} GW</Value>
-      {current.north !== null && current.south !== null && (
-        <Sub>
-          N {Math.round(current.north)} · S {Math.round(current.south)}
-        </Sub>
+      {total === null ? (
+        <Value $total={0}>—</Value>
+      ) : (
+        <>
+          <Value $total={total}>{total} GW</Value>
+          {current.north !== null && current.south !== null && (
+            <Sub>
+              N {Math.round(current.north)} · S {Math.round(current.south)}
+            </Sub>
+          )}
+        </>
       )}
     </Container>
   );

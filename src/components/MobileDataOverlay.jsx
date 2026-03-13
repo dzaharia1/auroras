@@ -72,6 +72,7 @@ export default function MobileDataOverlay({
   activeView,
   spaceWeather,
   stormMode,
+  date,
 }) {
   const isLive = stormMode === 'live';
   const isHistorical = stormMode === 'historical';
@@ -104,7 +105,7 @@ export default function MobileDataOverlay({
         {activeView === 'sun' && (
           <>
             <SolarFlareLayer xray={spaceWeather?.xray} />
-            <SolarCycleLayer />
+            <SolarCycleLayer date={date} />
             <SolarWindOriginLayer solarWind={spaceWeather?.solarWind} />
           </>
         )}
@@ -139,4 +140,5 @@ MobileDataOverlay.propTypes = {
     xray: PropTypes.object,
   }).isRequired,
   stormMode: PropTypes.string,
+  date: PropTypes.instanceOf(Date),
 };

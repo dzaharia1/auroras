@@ -153,6 +153,24 @@ function App() {
       if (k >= 8) demoCoords = STORM_DATA;
       else if (k >= 5) demoCoords = SUBSTORM_DATA;
 
+      // Derive peak flare class from NASA DONKI historical flares
+      const flares = historicalSpaceWeather.flares || [];
+      const classOrder = { X: 5, M: 4, C: 3, B: 2, A: 1 };
+      const peakFlare = flares.reduce((best, f) => {
+        const cls = f.classType?.[0];
+        const bestCls = best?.classType?.[0];
+        return (classOrder[cls] || 0) > (classOrder[bestCls] || 0) ? f : best;
+      }, null);
+      const peakClass = peakFlare?.classType?.[0] || null;
+
+      const historicalXray = peakClass
+        ? {
+            current: { fluxClass: peakClass },
+            peak24h: { fluxClass: peakClass },
+            activeAlert: peakClass === 'M' || peakClass === 'X',
+          }
+        : null;
+
       return {
         ...spaceWeather,
         loading: false,
@@ -162,6 +180,10 @@ function App() {
           visibility: historicalSpaceWeather.visibility,
         },
         ovation: { coordinates: demoCoords },
+        solarWind: historicalSpaceWeather.omni?.solarWind ?? null,
+        dst: historicalSpaceWeather.omni?.dst ?? null,
+        hemisphericPower: null,
+        xray: historicalXray,
       };
     }
 

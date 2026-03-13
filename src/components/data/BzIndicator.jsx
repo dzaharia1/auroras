@@ -31,17 +31,19 @@ const Arrow = styled.span`
 
 export default function BzIndicator({ solarWind }) {
   const bz = solarWind?.bz ?? null;
-  if (bz === null) return null;
-
-  const southward = bz < 0;
+  const southward = bz !== null && bz < 0;
 
   return (
     <Container>
       <Label>IMF Bz</Label>
-      <Value $southward={southward}>
-        <Arrow $southward={southward}>↓</Arrow>
-        {bz > 0 ? '+' : ''}{bz.toFixed(1)} nT
-      </Value>
+      {bz === null ? (
+        <Value $southward={false}>—</Value>
+      ) : (
+        <Value $southward={southward}>
+          <Arrow $southward={southward}>↓</Arrow>
+          {bz > 0 ? '+' : ''}{bz.toFixed(1)} nT
+        </Value>
+      )}
     </Container>
   );
 }

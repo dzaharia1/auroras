@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import ViewSwitcher from './view-controls/ViewSwitcher';
 import { styled, keyframes, css } from 'styled-components';
@@ -118,6 +118,12 @@ const Overlay = ({
   const [showControls, setShowControls] = useState(false);
   const isLive = stormMode === 'live';
 
+  const cycleDate = useMemo(() => {
+    const d = new Date(year, 0, 1);
+    d.setDate(day);
+    return d;
+  }, [year, day]);
+
   return (
     <>
       <OverlayContainer isIdle={isIdle}>
@@ -154,7 +160,7 @@ const Overlay = ({
             {activeView === 'sun' && (
               <>
                 <SolarFlareLayer xray={spaceWeather?.xray} />
-                <SolarCycleLayer />
+                <SolarCycleLayer date={cycleDate} />
                 <SolarWindOriginLayer solarWind={spaceWeather?.solarWind} />
               </>
             )}
@@ -219,6 +225,7 @@ const Overlay = ({
         activeView={activeView}
         spaceWeather={spaceWeather}
         stormMode={stormMode}
+        date={cycleDate}
       />
       {mobileOverlayOpen && <MobileDataOverlay />}
       {showSources && <SourcesModal onClose={() => setShowSources(false)} />}

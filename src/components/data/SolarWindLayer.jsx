@@ -41,20 +41,26 @@ export default function SolarWindLayer({ solarWind }) {
   const speed = solarWind?.speed ?? null;
   const density = solarWind?.density ?? null;
 
-  if (speed === null) return null;
-
   return (
     <Container>
       <Label>Solar Wind</Label>
-      <Row>
-        <BigValue $speed={speed}>{Math.round(speed)}</BigValue>
-        <Unit>km/s</Unit>
-      </Row>
-      {density !== null && (
+      {speed === null ? (
         <Row>
-          <BigValue $speed={0}>{density.toFixed(1)}</BigValue>
-          <Unit>p/cm³</Unit>
+          <BigValue $speed={-1} style={{ color: 'rgba(255,255,255,0.45)' }}>—</BigValue>
         </Row>
+      ) : (
+        <>
+          <Row>
+            <BigValue $speed={speed}>{Math.round(speed)}</BigValue>
+            <Unit>km/s</Unit>
+          </Row>
+          {density !== null && (
+            <Row>
+              <BigValue $speed={0}>{density.toFixed(1)}</BigValue>
+              <Unit>p/cm³</Unit>
+            </Row>
+          )}
+        </>
       )}
     </Container>
   );

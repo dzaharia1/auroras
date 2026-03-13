@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 // Solar Cycle 25: minimum Dec 2019, predicted maximum ~Jul 2025, next minimum ~2030
@@ -5,9 +6,9 @@ const CYCLE_START = new Date('2019-12-01');
 const CYCLE_END = new Date('2030-06-01');
 const CYCLE_DURATION_MS = CYCLE_END - CYCLE_START;
 
-function getCycleProgress() {
-  const now = new Date();
-  const elapsed = now - CYCLE_START;
+function getCycleProgress(date) {
+  const ref = date || new Date();
+  const elapsed = ref - CYCLE_START;
   return Math.min(Math.max(elapsed / CYCLE_DURATION_MS, 0), 1);
 }
 
@@ -72,8 +73,8 @@ const Dot = styled.div`
   box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
 `;
 
-export default function SolarCycleLayer() {
-  const progress = getCycleProgress();
+export default function SolarCycleLayer({ date }) {
+  const progress = getCycleProgress(date);
   const phase = getCyclePhase(progress);
 
   return (
@@ -89,3 +90,6 @@ export default function SolarCycleLayer() {
   );
 }
 
+SolarCycleLayer.propTypes = {
+  date: PropTypes.instanceOf(Date),
+};

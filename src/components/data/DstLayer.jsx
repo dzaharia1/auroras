@@ -75,15 +75,19 @@ export default function DstLayer({ dst }) {
   const current = dst?.current;
   const trend = dst?.trend;
 
-  if (!current) return null;
-
   return (
     <Container>
       <Label>Dst Index</Label>
-      <Value $value={current.value}>
-        {current.value > 0 ? '+' : ''}{Math.round(current.value)} nT
-      </Value>
-      {renderSparkline(trend)}
+      {!current ? (
+        <Value $value={0}>—</Value>
+      ) : (
+        <>
+          <Value $value={current.value}>
+            {current.value > 0 ? '+' : ''}{Math.round(current.value)} nT
+          </Value>
+          {renderSparkline(trend)}
+        </>
+      )}
     </Container>
   );
 }
