@@ -22,6 +22,7 @@ import {
   generateQuietOvation,
 } from './utils/stormData';
 import './index.css';
+import './utils/datadog';
 
 // Pre-generate storm data once (expensive, ~10k points)
 const STORM_DATA = generateStormOvation();
