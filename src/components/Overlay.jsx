@@ -18,6 +18,8 @@ import Timeline from './view-controls/Timeline';
 import FullscreenControl from './view-controls/FullscreenControl';
 import WavelengthSelector from './WavelengthSelector';
 import MobileControlsDialog from './view-controls/MobileControlsDialog';
+import StatusBadge from './common/StatusBadge';
+
 const OverlayContainer = styled.div`
   pointer-events: none;
   position: absolute;
@@ -114,6 +116,8 @@ const Overlay = ({
   const [showSources, setShowSources] = useState(false);
   const [mobileOverlayOpen, setMobileOverlayOpen] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const isLive = stormMode === 'live';
+
   const cycleDate = useMemo(() => {
     const d = new Date(year, 0, 1);
     d.setDate(day);
@@ -132,6 +136,13 @@ const Overlay = ({
             </SubTitle>
             <SourcesButton onClick={() => setShowSources(true)} />
           </Header>
+          {activeView === 'earth' && (
+            <StatusBadge
+              isLive={isLive}
+              isHistorical={stormMode === 'historical'}
+              stormMode={stormMode}
+            />
+          )}
           <ViewSwitcher activeView={activeView} onViewChange={onViewChange} />
         </OverlayRow>
         <OverlayRow row="bottomRow" screenSize="desktop">
@@ -193,6 +204,13 @@ const Overlay = ({
             <BarChart2 size={18} />
             Data
           </Button>
+          {activeView === 'earth' && (
+            <StatusBadge
+              isLive={isLive}
+              isHistorical={stormMode === 'historical'}
+              stormMode={stormMode}
+            />
+          )}
           <Button
             onClick={() => setShowControls(true)}
             style={{ height: '48px' }}>
