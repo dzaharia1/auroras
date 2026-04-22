@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { X } from 'lucide-react';
 import Button from './common/Button';
-import StatusBadge from './common/StatusBadge';
 import BzIndicator from './data/BzIndicator';
 import SolarWindLayer from './data/SolarWindLayer';
 import DstLayer from './data/DstLayer';
@@ -52,20 +51,6 @@ const DataMetricsColumn = styled.div`
   gap: 1.5rem;
 `;
 
-const MobileBottomRightStack = styled.div`
-  display: none;
-  @media (max-width: 1280px) {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    position: absolute;
-    bottom: calc(1.5rem + env(safe-area-inset-bottom) + 48px + 8px);
-    right: calc(1.5rem + env(safe-area-inset-right));
-    z-index: 20;
-    pointer-events: none;
-  }
-`;
-
 export default function MobileDataOverlay({
   isOpen,
   onClose,
@@ -74,9 +59,6 @@ export default function MobileDataOverlay({
   stormMode,
   date,
 }) {
-  const isLive = stormMode === 'live';
-  const isHistorical = stormMode === 'historical';
-
   return (
     <OverlayWrapper $isOpen={isOpen}>
       <div
@@ -110,16 +92,6 @@ export default function MobileDataOverlay({
           </>
         )}
       </DataMetricsColumn>
-
-      {activeView === 'earth' && (
-        <MobileBottomRightStack>
-          <StatusBadge
-            isLive={isLive}
-            isHistorical={isHistorical}
-            stormMode={stormMode}
-          />
-        </MobileBottomRightStack>
-      )}
 
       <Button fullWidth onClick={onClose} style={{ marginTop: '0.5rem' }}>
         <X size={20} style={{ marginRight: '8px' }} />
