@@ -33,8 +33,32 @@ const SolarImage = styled.img`
   object-fit: contain;
   display: block;
   opacity: ${({ $loading }) => ($loading ? 0.5 : 1)};
-  transition: opacity 0.3s ease;
+  filter: ${({ $loading }) => ($loading ? 'blur(6px)' : 'none')};
+  transition: opacity 0.4s ease, filter 0.4s ease;
   user-select: none;
+`;
+
+const SpinnerOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 10;
+`;
+
+const Spinner = styled.div`
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 200, 100, 0.85);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 `;
 
 const Timestamp = styled.div`
@@ -240,6 +264,12 @@ export default function SunImageView({ sunWavelength, sunDate }) {
           alt={`Solar disk at ${sunWavelength} Å`}
           draggable={false}
         />
+
+        {loading && (
+          <SpinnerOverlay>
+            <Spinner />
+          </SpinnerOverlay>
+        )}
 
         {/* SVG overlay positioned exactly over the rendered image */}
         {imageDims.width > 0 && imageDims.height > 0 && (
